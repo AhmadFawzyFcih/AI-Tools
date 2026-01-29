@@ -1,0 +1,205 @@
+Course Links:-
+==============
+Claude code:-
+	https://code.claude.com/docs/en/overview
+	https://claude.ai/new
+
+
+MCP servers:-
+	https://modelcontextprotocol.io/docs/getting-started/intro
+	
+	
+Cursor:-
+	https://cursor.com/docs
+
+
+Course Github Repo:-
+	https://github.com/emarco177/claude-code-crash-course
+	
+
+system-prompts-and-models-of-ai-tools:-
+	https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools
+	
+rules:-
+	https://cursor.directory/rules/rails
+=============================================================================
+Advices:-
+=========
+-system prompt: de ahm haga wala tkon very very very detailed wala tkon missy.
+-subAgents: enta kda bt5ly claude code y3ml aktr mn haga at the same time.
+=============================================================================
+Rules:- (customizing context)
+=============================
+-de haga by7slha save f folder esmo memory/backend/CLAUD.MD msln
+-de bt7dd sh5syto w eno yb2a focused aktr 3 el tools eli btst5dmha w el stack w kda
+-w bt5osh 3 el site dh ta5od el rule mno w t3mlha copy past hena f CLAUDE.MD file
+	-https://cursor.directory/rules/rails
+-bs dh by7slo load b shakl mo3en hn3rfo b3den ??
+
+-lma bt3ml planning mn el ahsn t5lyh y7ot el plan de f folder esmo memory/spec/CLAUDE.MD
+ 34an bykon 7att fyha kol el steps w kol el planning abl ma ybd2 ynfz b2a w kda.
+ 
+ -b3d kda hy switch l sohnet mode w ht2olo y implement according ll file dh memory/spec/CLAUDE.MD 
+=============================================================================
+Prompts:-
+=========
+- /init: 
+	=> ay project swa2 gded aw adem el command dh by5ly el agent yro7 yfhm kol haga
+	   feh zy el structure w el schema w el codebase w kda, dh bysa3do lma btegy ts2lo.
+	=> dh hy generate el kalam dh b2a fe file esmo CLAUDE.md file
+	=> w 3ady kol shoia t runha 34an t update claude b kol el info el gdeda.
+	 
+- /exit:
+	=> dh by exit el session eli sh8ala.
+	
+- /clear:
+	=> de bt3ml clear ll session eli fat7ha w t5lek tbd2 fresh 34an lma btfdl ttklm 
+	   f nfs el session m3 claude dh by5lyh ytoh w myb2ash mrkz
+	   
+- /compact:
+	=> aw tst5dm compact dh by3ml summary l ahm el points f eli fat lw enta 3awzo
+	   yfdl fakr b2a eli mktob w kda 34an ykml 3aleh.
+	   
+- /agents:
+	=> dh hy5lek t create agents b nfsk w tkon msln ms2ola 3n code review
+	   aw ms2ol 3n testing aw 3n code structure and so on.
+	   w bykon mofed f el subAgents w kda.
+
+- /ide
+	=> dh by5lek t5tar ht3ml integration l claude m3 anhy editor 
+	   w bydek kza e5tyar zy msln vsCode, Cursor and windsurf
+
+- /mcp:
+	=> de btwrek eh el mcp servers eli enta mstbha 3andk.
+	=> context7 and playwright (dh by5lek t3ml hagat automation m3 el browser)
+	=> open browser on facebook.com
+
+/hooks:
+	=> dh prompt gamd fash5 by5lek t7dd hagat t run m3 action mo3en w enta bts5dm
+	   claude zy ma msln 
+
+- switch to plan mood:-
+	=> shift + tap
+	
+-/model:-
+	=> dh by5lek t7dd anhy model hysht8l now (opus, sonnet, and so on)
+	
+-
+=============================================================================
+Agents Differencues:-
+=====================
+-Opus: (dh ll complext tasks) + (bywsl ll limit asr3)
+-Sonnet: balance (intelligence, cost, speed)
+
+
+
+=============================================================================
+==================
+
+
+
+=============================================================================
+==================
+
+
+
+=============================================================================
+==================
+
+
+
+=============================================================================
+==================
+
+
+
+=============================================================================
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================

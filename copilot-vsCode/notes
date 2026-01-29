@@ -1,0 +1,60 @@
+Articles about How to use AI:-
+------------------------------
+	-https://www.linkedin.com/pulse/%D8%A5%D8%B2%D8%A7%D9%8A-%D8%AA%D8%B6%D8%A7%D8%B9%D9%81-%D8%A5%D9%86%D8%AA%D8%A7%D8%AC%D9%8A%D8%AA%D9%83-10-%D8%A3%D8%B6%D8%B9%D8%A7%D9%81-%D8%A7%D9%84%D8%B3%D8%B1-%D9%81%D9%8A-%D8%A7%D9%84%D9%80-autonomous-mansy--246rf/
+==============================================================================================================
+Documentation Copilot m3 el vsCode: 
+	-https://code.visualstudio.com/docs/copilot/chat/inline-chat
+	-https://code.visualstudio.com/docs/copilot/customization/prompt-files
+	-https://github.com/settings/copilot/features
+==============================================================================================================
+Agent mood: dh agmd wa7d 34an bysht8l ben kol el files w byktblk eli enta 3awzo w by3ml edit f el files 3ady
+Ask mood: dh enta bts2lo w bygawbk w b3dha enta momkn t7wl ll agent mood w t2olo nfz eli enta l2eto
+Edit Mood: small edit in individual files
+Plan Mood: dh b2a enta da5l 3 feature w 3awzo yfkr m3ak w y plan m3ak kol haga w kda.
+
+==============================================================================================================
+How to solve or do some task ?
+	-use plan mood first.
+	-be specific while give him info in details, good resources like files related to the feature that you need to implement.
+	-at the end of the prompt, give some examples of what expected to get.
+==============================================================================================================
+Prompt files: 
+	-de enta bt create prompt files w btdelo name w desc w t7dd no3 el agent.
+	-w ynf3 kman tdelo input zy esm el file w el hagat de.
+==============================================================================================================
+How to use some tricks:-
+	-lw ktbt hash (#) w b3dha ktbt esm el file + enk kman tkon m7dd el file dh f el context dh byshl 3aleh hagat ktera.
+	-lw ktbt back slash (/) hytl3lk el prompt eli enta btst5dmha w sa3tha e5tarha w edyha el input bta3ha
+	-lw ktbt /help: dh hyshr7lk hagat ktera w kda.
+	-momkn kman lma t select block of code w tdos 3la 3lamt el lamba y2olk review aw write tests w kda.
+	-lw 3mlt changes f el code w 3mlt add ll files, htla2y 3lamt el ngom de mkan el commit msg lw dost 3aleha hydek esm
+	el commit msg mn 8er ma enta eli tfkr.
+	-
+==============================================================================================================
+Instructions:-
+	-de fe mnha chat instructions, enk msln t3ml instruction file m5sos w ytnfz 3 el ba2y w kda.
+	-aw fe haga esmha AGENTS.MD
+==============================================================================================================
+MCP Server:-(Model Context Protocol)
+============
+	-https://modelcontextprotocol.io/docs/getting-started/intro
+	-el fikra mn el mcp server: bt5ly el agent bta3k yb2a m3ah other resources ygeb mnha info msh bs el project bta3k.
+	-34an t3ml add mcp server
+	-htdos: ctrl + shift + p = w tktb f el search mcp server
+	-w t5tar add server w tshof b2a mn el list eli httl3lk 3 gamb enta 3awz t install men f dol.
+	-aw ndos 3la 3lamt el settings f chat w n5tar mcp servers.
+	-f mcp servers koisa momkn t3mlha install such as context7
+	-bs 5od balk mt3mlsh install l hagat kter 34an dh bya5od tokens ktera w bysthlk awi, fa e5tar haga enta m7tagha bgd.
+	
+	
+
+==============================================================================================================
+
+
+==============================================================================================================
+
+
+==============================================================================================================
+
+
+==============================================================================================================
