@@ -76,7 +76,7 @@ Prompts:-
 
 /hooks:
 	=> dh prompt gamd fash5 by5lek t7dd hagat t run m3 action mo3en w enta bts5dm
-	   claude zy ma msln 
+	   claude zy ma msln, z
 
 - switch to plan mood:-
 	=> shift + tap
@@ -84,30 +84,49 @@ Prompts:-
 -/model:-
 	=> dh by5lek t7dd anhy model hysht8l now (opus, sonnet, and so on)
 	
--
+
+-/rewind:-
+	=> bt5lek t3ml undo ll changes eli 3mltha w t5tar trg3 l anhy point
+	   w y5lek t5tar trg3 ll conversarion bs wala ll code bs wala ll etnen
+	   
+	   
+-/plugins:-
+	=> bt3ml install mn 5elalha l kza haga.
+
+-/context:-
+	=> de btwrek enta btst5dm eh el prompt eli htktbha w btwrek lw f mcp servers running
+	=> 
+	
+	
+
 =============================================================================
 Agents Differencues:-
 =====================
 -Opus: (dh ll complext tasks) + (bywsl ll limit asr3)
 -Sonnet: balance (intelligence, cost, speed)
-
-
+=============================================================================
+memory:-
+========
+- lw ktbt # w b3d kda ktbt haga hy5lek t3mlha save w tt3rf f el claude file enha m3loma
+=============================================================================
+custome commands:-
+==================
+- commands/commit-code.md
+- w ynf3 t pass argument zy ma enta 5adt screenshot lyha
 
 =============================================================================
-==================
+MCP (model context protocol) servers:-
+======================================
+- LSP: language server protocol
+	=> bt3mlha install 3n try2 btktb /plugins w t3ml install lyha
 
-
-
-=============================================================================
-==================
-
-
-
-=============================================================================
-==================
-
-
-
+-34an t connect m3 mcp server btro7 t3mlo install zy el screenshoot w bta5od el comman mn hena
+	=>https://github.com/upstash/context7?tab=readme-ov-file
+	=>https://code.claude.com/docs/en/mcp
+	=>kman t2dr t7dd anhy mcp server hy7slo load zy el screenshot eli f folder 5
+	  34an mt3mlsh load l kol el mcp server dol w enta msh bts5dmhom w bysthlko tokens
+	  
+-
 =============================================================================
 ==================
 
