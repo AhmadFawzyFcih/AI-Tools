@@ -22,6 +22,9 @@ system-prompts-and-models-of-ai-tools:-
 	
 rules:-
 	https://cursor.directory/rules/rails
+	
+Notes:-
+	=> LLMs are better at writing code to call MCP than at calling CMP directly.
 =============================================================================
 Advices:-
 =========
@@ -81,6 +84,8 @@ Prompts:-
 - switch to plan mood:-
 	=> shift + tap
 	
+-ctrl + R: bt5lek tshof details el command w hoa sh8al.
+	
 -/model:-
 	=> dh by5lek t7dd anhy model hysht8l now (opus, sonnet, and so on)
 	
@@ -125,66 +130,102 @@ MCP (model context protocol) servers:-
 	=>https://code.claude.com/docs/en/mcp
 	=>kman t2dr t7dd anhy mcp server hy7slo load zy el screenshot eli f folder 5
 	  34an mt3mlsh load l kol el mcp server dol w enta msh bts5dmhom w bysthlko tokens
-	  
--
+
+- DisAdvantage with MCP
+	=>
 =============================================================================
-==================
-
-
-
+/plugin command
+===============
+https://claude.com/blog/claude-code-plugins
+https://github.com/anthropics/claude-code/tree/main/plugins
+https://www.aitmpl.com/plugins
 =============================================================================
-==================
+Automation development workflow:-
+=================================
+https://github.com/features/actions
+https://code.claude.com/docs/en/github-actions
+https://github.com/emarco177/IceBreaker/tree/main/.github/workflows
 
 
-
+-/git
+	=>integrate claude with github
+	=>integrate with a specific repo.
+	=>w bt2dr t3ml workflow mn 5elalo eno y3ml review w y commit w y push
 =============================================================================
-
-==================
-
-
-
+Plan mood:-
+===========
+- b3d ma t3ml planning etlop mno eno y7ot el plan de f .md file
+	=> dump the spec into a .md file
 =============================================================================
-==================
-
-
-
+parallel claude code sessions:-
+===============================
+-avoid to assign two agent in dpecdency task, you will face alot of conflicts.
 =============================================================================
-
-==================
-
-
-
-=============================================================================
-
-==================
-
-
-
-=============================================================================
-
-==================
-
+Subagents:-
+===========
+-/agent:-
+	=> crate new agent (name, desc, tools)
+	=> allow create more instance at the same time.
+	=> 
 
 
 =============================================================================
+agentic-loop-tree:-
+===================
+https://github.com/disler/infinite-agentic-loop/tree/main
 
-
-==================
-
-
-
-=============================================================================
-
-==================
-
-
+=> 3n try2 el gem de b2dr a create ay 3dd mn el agents 34an y3mlo el haga bsor3a 
+   de eli bysmoha el multi-agents.
 
 =============================================================================
-
+/output-style:new
 ==================
+=> de bt5lek t3ml style mo3en l shakl el output, y3ni 3awz pullet points aw
+   3awzha yml file w hkza, bt3ml custome output style w kda.
 
+=>
+=============================================================================
+Agent Skills:-
+==============
+https://github.com/anthropics/skills
+https://claude.com/blog/equipping-agents-for-the-real-world-with-agent-skills
 
+https://github.com/mhattingpete/claude-skills-marketplace/tree/main
+https://github.com/emarco177/claude-code-crash-course/tree/project/skills
 
+=> de skills bt3mlha install mn /plugin w t3ml install lyha w tbd2 tst5dmha.
+=>zy msln el skill bta3t git pushing
+	=>https://github.com/mhattingpete/claude-skills-marketplace/tree/main/engineering-workflow-plugin/skills/git-pushing
+	=>3ml nfs el folder structure t7t .claude/skills/...
+	=>5d el hagat copy past blzbt w bs kda. 
+
+=============================================================================
+SKills vs MCP:-
+===============
+-skills: 
+	=> de haga sabta aw task mo3ena btktb fyha el instructions ll AI eno yt3lmha
+	   w by3mlha b shakl consistent (daily).
+	=> de btkon filles mwgoda f folder skills 
+	=> el execution bykon f el 8alb locally.
+	
+-MCP:
+	=> dh by5ly el AI bydwr f external resources 3n m3loma mo3ena.
+	=> el execution bykon f el mcp servers.
+
+-tb3n enta eli  bt7dd aw el agen hyst5dm meen w kda.
+=============================================================================
+skills vs subagents
+==================
+-subagents
+	=> run on isolated and fresh context window w dh kois ll tasks el kbera w kda
+	
+-skills
+	=> operate in the main agent window.
+	=>
+
+-tb a5tar men f eh? 
+	=>lw 3andk heavy task w msh 3awz tfsh5 el main context window, est5dm subagent
+	=>
 =============================================================================
 
 ==================
