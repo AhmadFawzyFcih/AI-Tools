@@ -1,37 +1,60 @@
+El zatona:-
+===========
+-Custom Command
+	=>.claude/commands/command_name.md
+
+-skills
+	=>command to create: /plugin
+	=>dir to save: .claude/skills/git-pushing
+		=>scripts/smart_commit.sh
+		=>SKILL.MD
+-subagents
+	=>command to create a new agent: /agents
+	=>dir to save: .claude/agents/agent_name.md
+	
+	
+-Rules(customizing context)
+	=>memory/backend/CLAUD.MD
+	=>bt5osh 3 el site dh ta5od el rule mno w t3mlha copy past hena f CLAUDE.MD file
+	=>https://cursor.directory/rules/rails
+	
+	
+-Plans
+	=>lma bt3ml planning mn el ahsn t5lyh y7ot el plan de f folder esmo 
+	=> dump the spec into a .md file
+	=>memory/spec/CLAUDE.MD
+=============================================================================
 Course Links:-
 ==============
-Claude code:-
+Claude code:- [DONE]
 	https://code.claude.com/docs/en/overview
 	https://claude.ai/new
 
 
-MCP servers:-
+MCP servers:- [DONE]
 	https://modelcontextprotocol.io/docs/getting-started/intro
 	
 	
-Cursor:-
+Cursor:- [DONE]
 	https://cursor.com/docs
 
 
-Course Github Repo:-
+Course Github Repo:- [DONE]
 	https://github.com/emarco177/claude-code-crash-course
 	
-
-system-prompts-and-models-of-ai-tools:-
-	https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools
 	
-rules:-
+rules:- [DONE]
 	https://cursor.directory/rules/rails
 	
-Notes:-
-	=> LLMs are better at writing code to call MCP than at calling CMP directly.
+system-prompts-and-models-of-ai-tools:- [DONE]
+	https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools
 =============================================================================
-Advices:-
+Advices:- [DONE]
 =========
 -system prompt: de ahm haga wala tkon very very very detailed wala tkon missy.
 -subAgents: enta kda bt5ly claude code y3ml aktr mn haga at the same time.
 =============================================================================
-Rules:- (customizing context)
+Rules:- (customizing context) [DONE]
 =============================
 -de haga by7slha save f folder esmo memory/backend/CLAUD.MD msln
 -de bt7dd sh5syto w eno yb2a focused aktr 3 el tools eli btst5dmha w el stack w kda
@@ -44,7 +67,7 @@ Rules:- (customizing context)
  
  -b3d kda hy switch l sohnet mode w ht2olo y implement according ll file dh memory/spec/CLAUDE.MD 
 =============================================================================
-Prompts:-
+Prompts:- [DONE]
 =========
 - /init: 
 	=> ay project swa2 gded aw adem el command dh by5ly el agent yro7 yfhm kol haga
@@ -105,22 +128,22 @@ Prompts:-
 	=> by7sblk enta esthlkt ad eh w kda, 
 
 =============================================================================
-Agents Differencues:-
+Agents Differencues:- [DONE]
 =====================
 -Opus: (dh ll complext tasks) + (bywsl ll limit asr3)
 -Sonnet: balance (intelligence, cost, speed)
 =============================================================================
-memory:-
+memory:- [DONE]
 ========
 - lw ktbt # w b3d kda ktbt haga hy5lek t3mlha save w tt3rf f el claude file enha m3loma
 =============================================================================
-custome commands:-
+custome commands:- [DONE]
 ==================
 - commands/commit-code.md
 - w ynf3 t pass argument zy ma enta 5adt screenshot lyha
 
 =============================================================================
-MCP (model context protocol) servers:-
+MCP (model context protocol) servers:- [DONE]
 ======================================
 - LSP: language server protocol
 	=> bt3mlha install 3n try2 btktb /plugins w t3ml install lyha
@@ -134,13 +157,13 @@ MCP (model context protocol) servers:-
 - DisAdvantage with MCP
 	=>
 =============================================================================
-/plugin command
+/plugin command [DONE]
 ===============
 https://claude.com/blog/claude-code-plugins
 https://github.com/anthropics/claude-code/tree/main/plugins
 https://www.aitmpl.com/plugins
 =============================================================================
-Automation development workflow:-
+Automation development workflow:- [DONE]
 =================================
 https://github.com/features/actions
 https://code.claude.com/docs/en/github-actions
@@ -152,25 +175,23 @@ https://github.com/emarco177/IceBreaker/tree/main/.github/workflows
 	=>integrate with a specific repo.
 	=>w bt2dr t3ml workflow mn 5elalo eno y3ml review w y commit w y push
 =============================================================================
-Plan mood:-
+Plan mood:- [DONE]
 ===========
 - b3d ma t3ml planning etlop mno eno y7ot el plan de f .md file
 	=> dump the spec into a .md file
 =============================================================================
-parallel claude code sessions:-
+parallel claude code sessions:- [DONE]
 ===============================
 -avoid to assign two agent in dpecdency task, you will face alot of conflicts.
 =============================================================================
-Subagents:-
+Subagents:- [DONE]
 ===========
 -/agent:-
 	=> crate new agent (name, desc, tools)
-	=> allow create more instance at the same time.
-	=> 
-
-
+	=> allow create more instance at the same time
+	
 =============================================================================
-agentic-loop-tree:-
+agentic-loop-tree:- [DONE]
 ===================
 https://github.com/disler/infinite-agentic-loop/tree/main
 
@@ -178,14 +199,14 @@ https://github.com/disler/infinite-agentic-loop/tree/main
    de eli bysmoha el multi-agents.
 
 =============================================================================
-/output-style:new
+/output-style:new [DONE]
 ==================
 => de bt5lek t3ml style mo3en l shakl el output, y3ni 3awz pullet points aw
    3awzha yml file w hkza, bt3ml custome output style w kda.
 
 =>
 =============================================================================
-Agent Skills:-
+Agent Skills:- [DONE]
 ==============
 https://github.com/anthropics/skills
 https://claude.com/blog/equipping-agents-for-the-real-world-with-agent-skills
@@ -200,7 +221,7 @@ https://github.com/emarco177/claude-code-crash-course/tree/project/skills
 	=>5d el hagat copy past blzbt w bs kda. 
 
 =============================================================================
-SKills vs MCP:-
+SKills vs MCP:- [DONE]
 ===============
 -skills: 
 	=> de haga sabta aw task mo3ena btktb fyha el instructions ll AI eno yt3lmha
@@ -212,47 +233,40 @@ SKills vs MCP:-
 	=> dh by5ly el AI bydwr f external resources 3n m3loma mo3ena.
 	=> el execution bykon f el mcp servers.
 
--tb3n enta eli  bt7dd aw el agen hyst5dm meen w kda.
+-tb3n enta eli  bt7dd aw el agent hyst5dm meen w kda.
 =============================================================================
-skills vs subagents
-==================
+skills vs subagents:- [DONE]
+=====================
 -subagents
 	=> run on isolated and fresh context window w dh kois ll tasks el kbera w kda
 	
 -skills
 	=> operate in the main agent window.
-	=>
 
 -tb a5tar men f eh? 
 	=>lw 3andk heavy task w msh 3awz tfsh5 el main context window, est5dm subagent
-	=>
 =============================================================================
-Git Worktree:-
-==============
-https://git-scm.com/docs/git-worktree
-https://www.youtube.com/watch?v=8vsRb2mTBA8
 
-=============================================================================
-Deep Agent:-
-============
--dh el agent eli by7l mshakl complex awi 3n try2 eno by3ml planning w todo lists w by3mlha breake w kda.
--w bts5tdm el subagents 34an mt3mlsh blow ll main context w kda w mt5lksh kol shoia t3ml clear w el kalam dh.
-
-=============================================================================
-Agentic coding secuirty:-
-=========================
--Tenzan i: de sherka mot5ssa f el secuirty issues w el hacking w hkza.
--security cases is your responasabity as a developer not the agent.
--
-
-
-
-
-=============================================================================
-Cursor vs Claude
 ==================
--see 2 screen shot bs mn el a5er claude byklm el anthropic servers direct.
--
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+==================
+
+
+
+=============================================================================
+
+==================
+
 
 
 =============================================================================
