@@ -152,6 +152,11 @@
   .badge-build   { background: var(--green-soft); color: var(--green); }
   .badge-review  { background: var(--purple-soft); color: var(--purple); }
   .badge-docs    { background: var(--pink-soft); color: var(--pink); }
+  .badge-pipeline {
+    background: linear-gradient(135deg, var(--cyan-soft), var(--orange-soft), var(--green-soft), var(--purple-soft), var(--pink-soft));
+    color: var(--orange);
+    border: 1px solid rgba(210, 153, 34, 0.25);
+  }
 
   .command-desc {
     color: var(--text-muted);
@@ -378,6 +383,14 @@
         /documentation
       </a>
     </div>
+  </div>
+
+  <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap; padding: 0 20px;">
+    <span style="color: var(--text-muted); font-size: 0.85rem;">Or run everything at once:</span>
+    <a class="step-box" href="#full-cycle" style="border-color: var(--orange); background: var(--orange-soft); font-family: var(--mono); font-size: 0.82rem; padding: 10px 18px; border-radius: 8px; position: relative; text-decoration: none; color: var(--text); transition: all 0.2s; border: 1px solid var(--orange);">
+      <span class="step-num" style="background: var(--orange);">*</span>
+      /full-cycle
+    </a>
   </div>
 </div>
 
@@ -993,6 +1006,176 @@
       </tr>
     </tbody>
   </table>
+</section>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- FULL CYCLE -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="command-section" id="full-cycle">
+  <div class="command-header">
+    <h2>/full-cycle</h2>
+    <span class="command-badge badge-pipeline">Pipeline</span>
+  </div>
+  <p class="command-desc">
+    Orchestrates the entire development lifecycle in a single automated pipeline — requirements analysis, planning, implementation, code review, and documentation — with a live HTML master dashboard tracking all 5 stages.
+  </p>
+
+  <div class="examples-grid">
+
+    <!-- Example 1 -->
+    <div class="example-card open">
+      <div class="example-label" onclick="toggle(this)">
+        <div class="example-label-left">
+          <h3>Single ticket</h3>
+        </div>
+        <span class="example-chevron">&#9654;</span>
+      </div>
+      <div class="example-body">
+        <p>Run the full pipeline for a single Jira story. All 5 stages execute automatically, pausing only at critical decision points.</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="cmd">/full-cycle</span> <span class="string">PROJ-123</span>
+        </div>
+        <div class="output-line">
+          <span class="arrow">&#8594;</span> <code>full-cycle-2026-02-15-143000.html</code> (master dashboard)
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 2 -->
+    <div class="example-card">
+      <div class="example-label" onclick="toggle(this)">
+        <div class="example-label-left">
+          <h3>Multiple tickets</h3>
+        </div>
+        <span class="example-chevron">&#9654;</span>
+      </div>
+      <div class="example-body">
+        <p>Run the pipeline across multiple Jira stories at once.</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="cmd">/full-cycle</span> <span class="string">PROJ-123 PROJ-456 PROJ-789</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 3 -->
+    <div class="example-card">
+      <div class="example-label" onclick="toggle(this)">
+        <div class="example-label-left">
+          <h3>Sprint</h3>
+        </div>
+        <span class="example-chevron">&#9654;</span>
+      </div>
+      <div class="example-body">
+        <p>Run the full pipeline for all stories in a sprint.</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="cmd">/full-cycle</span> <span class="string">"Sprint 5"</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 4 -->
+    <div class="example-card">
+      <div class="example-label" onclick="toggle(this)">
+        <div class="example-label-left">
+          <h3>Tickets + Figma designs</h3>
+        </div>
+        <span class="example-chevron">&#9654;</span>
+      </div>
+      <div class="example-body">
+        <p>Provide Figma URLs explicitly for design analysis in Stage 1.</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="cmd">/full-cycle</span> <span class="string">PROJ-123 PROJ-456</span> \
+  <span class="flag">--figma</span> <span class="url">https://www.figma.com/design/abc/File1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Example 5 -->
+    <div class="example-card">
+      <div class="example-label" onclick="toggle(this)">
+        <div class="example-label-left">
+          <h3>Full combo with linked tasks</h3>
+          <span class="mode-tag">Recommended</span>
+        </div>
+        <span class="example-chevron">&#9654;</span>
+      </div>
+      <div class="example-body">
+        <p>The full command: multiple tickets, linked task inspection, and explicit Figma files. This gives the most thorough end-to-end result.</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="cmd">/full-cycle</span> <span class="string">PROJ-123 PROJ-456</span> \
+  <span class="flag">--check-linked-tasks</span> \
+  <span class="flag">--figma</span> <span class="url">https://www.figma.com/design/abc/File1</span>
+        </div>
+        <div class="output-line">
+          <span class="arrow">&#8594;</span> <code>full-cycle-2026-02-15-143000.html</code> + all stage artifacts
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <table class="flags-table">
+    <thead>
+      <tr><th>Flag</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>--figma &lt;urls&gt;</code></td>
+        <td>One or more Figma file URLs to analyze against the Jira stories</td>
+      </tr>
+      <tr>
+        <td><code>--check-linked-tasks</code></td>
+        <td>Also fetch linked issues, subtasks, priority, and status for each story</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin-top: 20px;">
+    <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px;">Pipeline Stages</h4>
+    <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem;">
+      <div><span style="color: var(--cyan); font-weight: 600;">1.</span> <strong>Requirements Analysis</strong> — fetches Jira + Figma, maps stories to designs, detects mismatches, publishes to Confluence</div>
+      <div><span style="color: var(--orange); font-weight: 600;">2.</span> <strong>Implementation Planning</strong> — generates a phased plan from Jira + Confluence + analysis context</div>
+      <div><span style="color: var(--green); font-weight: 600;">3.</span> <strong>Implementation</strong> — architecture discussion, then phase-by-phase code + tests (uses <code>/implement-plan-nicely</code> workflow)</div>
+      <div><span style="color: var(--purple); font-weight: 600;">4.</span> <strong>Code Review</strong> — reviews all changes, generates interactive HTML report, applies selected fixes</div>
+      <div><span style="color: var(--pink); font-weight: 600;">5.</span> <strong>Documentation</strong> — creates or updates Confluence API documentation from code + plan</div>
+    </div>
+  </div>
+
+  <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin-top: 16px;">
+    <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px;">Pause Points</h4>
+    <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 14px; line-height: 1.6;">
+      The pipeline auto-continues where safe and pauses only at critical decisions:
+    </p>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.78rem;">
+      <span style="background: var(--cyan-soft); color: var(--cyan); padding: 4px 12px; border-radius: 20px;">Unmapped stories/designs</span>
+      <span style="background: var(--orange-soft); color: var(--orange); padding: 4px 12px; border-radius: 20px;">Before plan generation</span>
+      <span style="background: var(--green-soft); color: var(--green); padding: 4px 12px; border-radius: 20px;">Architecture decisions</span>
+      <span style="background: var(--green-soft); color: var(--green); padding: 4px 12px; border-radius: 20px;">After each phase</span>
+      <span style="background: var(--purple-soft); color: var(--purple); padding: 4px 12px; border-radius: 20px;">Review results</span>
+      <span style="background: var(--pink-soft); color: var(--pink); padding: 4px 12px; border-radius: 20px;">Doc target selection</span>
+    </div>
+  </div>
+
+  <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin-top: 16px;">
+    <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px;">Master Dashboard</h4>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.78rem;">
+      <span style="background: var(--green-soft); color: var(--green); padding: 4px 12px; border-radius: 20px;">&#10003; Complete</span>
+      <span style="background: var(--accent-soft); color: var(--accent); padding: 4px 12px; border-radius: 20px;">&#8635; Active</span>
+      <span style="background: rgba(139,148,158,0.12); color: var(--text-muted); padding: 4px 12px; border-radius: 20px;">&#9203; Pending</span>
+      <span style="background: rgba(248,81,73,0.12); color: var(--red); padding: 4px 12px; border-radius: 20px;">&#10007; Failed</span>
+      <span style="background: var(--orange-soft); color: var(--orange); padding: 4px 12px; border-radius: 20px;">&#9208; Paused</span>
+    </div>
+    <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 14px; line-height: 1.6;">
+      A single HTML dashboard tracks all 5 stages, sub-steps, decisions log, and all artifacts produced. Updated after every significant event. Dark theme with collapsible stage cards, progress bar, and color-coded status indicators.
+    </p>
+  </div>
 </section>
 
 </div>
