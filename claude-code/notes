@@ -23,6 +23,13 @@ El zatona:-
 	=>lma bt3ml planning mn el ahsn t5lyh y7ot el plan de f folder esmo 
 	=> dump the spec into a .md file
 	=>memory/spec/CLAUDE.MD
+	
+
+Paths
+	- vsCode: ~/.config/Code/User/mcp.json
+	- Claude: /home/ahmed/.claude.json
+	- Claude plugins, plans and so on
+	    - /home/ahmed/.claude
 =============================================================================
 Course Links:-
 ==============
