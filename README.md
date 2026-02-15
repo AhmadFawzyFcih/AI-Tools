@@ -19,6 +19,7 @@ These commands rely on the following MCP servers being configured in Claude Code
 | `/implement-plan-nicely` | Same as `/implement-plan` but with a live HTML progress dashboard |
 | `/review` | Review code changes (local or remote MR) and generate an interactive HTML report |
 | `/documentation` | Create or update Confluence API documentation from code + plan |
+| `/full-cycle` | Run the entire dev lifecycle (analyze → plan → implement → review → document) with a live dashboard |
 
 ---
 
@@ -224,6 +225,58 @@ When updating, it generates an interactive HTML review page (`doc-review-[date]-
 
 ---
 
+## `/full-cycle`
+
+Orchestrates the entire development lifecycle — from requirements analysis through implementation, review, and documentation — in a single automated pipeline with a live HTML dashboard. It chains all 5 stages together, auto-continuing where safe and pausing only at critical decisions.
+
+### Usage
+
+```bash
+# Single ticket
+/full-cycle PROJ-123
+
+# Multiple tickets
+/full-cycle PROJ-123 PROJ-456 PROJ-789
+
+# With Figma designs
+/full-cycle PROJ-123 PROJ-456 --figma https://www.figma.com/design/abc/File1
+
+# With linked tasks
+/full-cycle PROJ-123 --check-linked-tasks
+
+# Full combo
+/full-cycle PROJ-123 PROJ-456 --check-linked-tasks --figma https://www.figma.com/design/abc/File1
+
+# Sprint
+/full-cycle "Sprint 5"
+```
+
+### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--figma <urls>` | One or more Figma file URLs to analyze |
+| `--check-linked-tasks` | Also fetch linked issues, subtasks, priority, and status |
+
+### Pipeline Stages
+
+1. **Requirements Analysis** — fetches Jira stories + Figma designs, maps them, detects mismatches, publishes to Confluence
+2. **Implementation Planning** — generates a phased plan from Jira + Confluence + analysis context
+3. **Implementation** — executes the plan phase by phase with architecture discussion (uses `/implement-plan-nicely` workflow)
+4. **Code Review** — reviews all changes and generates an interactive HTML report
+5. **Documentation** — creates or updates Confluence API documentation
+
+### Pause Points
+
+The pipeline pauses only at critical moments: unmapped stories/designs, before plan generation, architecture decisions, after each implementation phase, review results, and documentation target selection. Everything else auto-continues.
+
+### Output
+
+- Master dashboard: `full-cycle-[date]-[HHMMSS].html` — tracks all 5 stages, decisions, and artifacts in one view
+- Plus all artifacts from each stage (requirements md, plan md, review HTML, Confluence pages)
+
+---
+
 ## Typical Workflow
 
 ```
@@ -233,6 +286,10 @@ When updating, it generates an interactive HTML review page (`doc-review-[date]-
    /implement-plan-nicely      →  Build it with a live progress dashboard
 4. /review                     →  Review the code
 5. /documentation              →  Document the APIs
+
+Or run everything at once:
+
+   /full-cycle                 →  All 5 stages in one automated pipeline
 ```
 
-Each step feeds into the next — the requirements analysis informs the plan, the plan drives implementation, the review catches issues, and the documentation captures what was built.
+Each step feeds into the next — the requirements analysis informs the plan, the plan drives implementation, the review catches issues, and the documentation captures what was built. Use `/full-cycle` to run the entire pipeline automatically with a single command.
