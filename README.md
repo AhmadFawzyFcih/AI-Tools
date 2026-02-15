@@ -16,6 +16,7 @@ These commands rely on the following MCP servers being configured in Claude Code
 | `/analyze-requirements` | Analyze Jira stories + Figma designs, detect mismatches |
 | `/plan-implementation` | Create a phased implementation plan from Jira + Confluence + your ideas |
 | `/implement-plan` | Execute an implementation plan phase by phase with architecture discussion |
+| `/implement-plan-nicely` | Same as `/implement-plan` but with a live HTML progress dashboard |
 | `/review` | Review code changes (local or remote MR) and generate an interactive HTML report |
 | `/documentation` | Create or update Confluence API documentation from code + plan |
 
@@ -123,6 +124,32 @@ Takes an implementation plan and executes it phase by phase. This is an **intera
 
 ---
 
+## `/implement-plan-nicely`
+
+Identical to `/implement-plan` but with one key addition: it generates and continuously updates a **visual HTML dashboard** that tracks the full progress of the implementation — phases, architecture decisions, file counts, spec results, and issues.
+
+### Usage
+
+```bash
+/implement-plan-nicely ./implementation-plan-PROJ-123-2026-02-15.md
+```
+
+### What It Does
+
+Everything `/implement-plan` does, plus:
+
+1. **Generates an HTML dashboard** before the architecture discussion starts
+2. **Updates the dashboard after every significant step** — each architecture sub-discussion, each file created, each spec run, each phase completion
+3. **Tracks status visually** with icons: ✅ Complete, 🔄 In Progress, ⏳ Pending, ❌ Failed, ⚠️ Needs Attention
+4. **Shows a summary section** with total files created/modified, spec results, architecture decisions, and V2 API coverage
+5. **Maintains an issues & notes log** at the bottom for spec failures, decisions, and tech debt
+
+### Output
+
+- Dashboard file: `implementation-progress-[date]-[HHMMSS].html`
+
+---
+
 ## `/review`
 
 Reviews code changes and generates an interactive HTML report with categorized findings. Supports local changes and remote merge requests.
@@ -200,11 +227,12 @@ When updating, it generates an interactive HTML review page (`doc-review-[date]-
 ## Typical Workflow
 
 ```
-1. /analyze-requirements    →  Understand what to build
-2. /plan-implementation     →  Plan how to build it
-3. /implement-plan          →  Build it phase by phase
-4. /review                  →  Review the code
-5. /documentation           →  Document the APIs
+1. /analyze-requirements       →  Understand what to build
+2. /plan-implementation        →  Plan how to build it
+3. /implement-plan             →  Build it phase by phase
+   /implement-plan-nicely      →  Build it with a live progress dashboard
+4. /review                     →  Review the code
+5. /documentation              →  Document the APIs
 ```
 
 Each step feeds into the next — the requirements analysis informs the plan, the plan drives implementation, the review catches issues, and the documentation captures what was built.
