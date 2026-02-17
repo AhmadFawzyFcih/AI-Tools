@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>k9s Field Guide — Rails Debugging on Kubernetes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --bg-card: #111827;
+    --bg-card-hover: #1a2332;
+    --bg-code: #0d1117;
+    --border: #1e293b;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-bright: #f8fafc;
+    --accent: #60a5fa;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --purple: #c084fc;
+    --orange: #fb923c;
+    --cyan: #22d3ee;
+    --k9s-blue: #326ce5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+  .hero {
+    position: relative;
+    padding: 80px 40px 60px;
+    text-align: center;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 50% 0%, #326ce520 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, #c084fc10 0%, transparent 40%),
+                radial-gradient(ellipse at 20% 80%, #4ade8010 0%, transparent 40%);
+    animation: drift 20s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-20px, -10px) rotate(1deg); }
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+
+  .hero .k9s-ascii {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.3;
+    color: var(--accent);
+    margin-bottom: 30px;
+    opacity: 0.7;
+    white-space: pre;
+    display: inline-block;
+  }
+
+  .hero h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    color: var(--text-bright);
+    margin-bottom: 12px;
+    letter-spacing: -1.5px;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero p { font-size: 1.1rem; color: var(--text-dim); max-width: 600px; margin: 0 auto; }
+
+  .badge {
+    display: inline-block;
+    background: var(--k9s-blue);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 20px;
+  }
+
+  .toc {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #0a0e17ee;
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    overflow-x: auto;
+  }
+
+  .toc-inner {
+    display: flex;
+    gap: 0;
+    max-width: 1100px;
+    margin: 0 auto;
+    white-space: nowrap;
+  }
+
+  .toc a {
+    display: block;
+    padding: 14px 16px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .toc a:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: #ffffff06;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 30px 30px 100px; }
+
+  .section { margin: 50px 0; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+
+  .section-icon.blue { background: #3b82f620; color: var(--accent); }
+  .section-icon.green { background: #4ade8020; color: var(--green); }
+  .section-icon.yellow { background: #fbbf2420; color: var(--yellow); }
+  .section-icon.red { background: #f8717120; color: var(--red); }
+  .section-icon.purple { background: #c084fc20; color: var(--purple); }
+  .section-icon.orange { background: #fb923c20; color: var(--orange); }
+  .section-icon.cyan { background: #22d3ee20; color: var(--cyan); }
+
+  .section h2 { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--text-bright); }
+  .section h3 { font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 600; color: var(--text-bright); margin: 28px 0 12px; }
+  .section p { color: var(--text-dim); margin-bottom: 14px; font-size: 0.95rem; }
+
+  .code-block {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 16px 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px;
+    background: #161b22;
+    border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  .code-header .dots { display: flex; gap: 6px; }
+  .code-header .dots span { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #f87171; }
+  .dot-yellow { background: #fbbf24; }
+  .dot-green { background: #4ade80; }
+
+  .code-block pre {
+    padding: 18px 20px; overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.84rem; line-height: 1.8; color: var(--text);
+  }
+
+  .code-block pre .comment { color: #6b7280; font-style: italic; }
+  .code-block pre .cmd { color: var(--green); }
+  .code-block pre .flag { color: var(--yellow); }
+  .code-block pre .arg { color: var(--cyan); }
+  .code-block pre .key { color: var(--orange); }
+
+  .hotkey-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px; margin: 16px 0;
+  }
+
+  .hotkey {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+
+  .hotkey:hover { border-color: var(--accent); background: var(--bg-card-hover); transform: translateY(-1px); }
+
+  .hotkey kbd {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 38px; height: 32px; padding: 0 10px;
+    background: #1e293b; border: 1px solid #334155; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem; font-weight: 600; color: var(--accent);
+    box-shadow: 0 2px 0 #0f172a; flex-shrink: 0;
+  }
+
+  .hotkey span { font-size: 0.85rem; color: var(--text-dim); }
+
+  .tip {
+    display: flex; gap: 14px; padding: 16px 20px; margin: 16px 0;
+    background: linear-gradient(135deg, #1e293b40, #0f172a40);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .tip.warn { border-left-color: var(--yellow); }
+  .tip.danger { border-left-color: var(--red); }
+  .tip.success { border-left-color: var(--green); }
+
+  .tip-icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 1px; }
+  .tip-content { font-size: 0.9rem; color: var(--text-dim); }
+  .tip-content strong { color: var(--text-bright); }
+  .tip-content code {
+    background: var(--bg-code); border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem; color: var(--green);
+  }
+
+  .steps { counter-reset: step; margin: 16px 0; }
+
+  .step {
+    counter-increment: step;
+    position: relative;
+    padding: 20px 24px 20px 70px;
+    margin: 12px 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: all 0.2s;
+  }
+
+  .step:hover { border-color: #334155; background: var(--bg-card-hover); }
+
+  .step::before {
+    content: counter(step);
+    position: absolute; left: 20px; top: 20px;
+    width: 34px; height: 34px;
+    background: var(--k9s-blue); color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.85rem;
+  }
+
+  .step h4 { font-family: 'Outfit', sans-serif; font-size: 1rem; font-weight: 600; color: var(--text-bright); margin-bottom: 6px; }
+  .step p { margin-bottom: 8px; font-size: 0.9rem; }
+  .step code {
+    display: inline-block; background: var(--bg-code); border: 1px solid var(--border);
+    padding: 2px 8px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--green);
+  }
+
+  .workflow {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin: 16px 0; padding: 20px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+  }
+
+  .wf-step {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; background: #1e293b; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent);
+  }
+
+  .wf-arrow { color: var(--text-dim); font-size: 1.2rem; }
+
+  .footer {
+    text-align: center; padding: 40px 20px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim); font-size: 0.8rem;
+  }
+
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  @media print {
+    .toc { position: static; }
+    body { background: #fff; color: #111; }
+    .hero::before { display: none; }
+    .code-block, .step, .hotkey, .tip { break-inside: avoid; }
+  }
+
+  @media (max-width: 600px) {
+    .hero { padding: 50px 20px 40px; }
+    .container { padding: 20px 16px 80px; }
+    .hotkey-grid { grid-template-columns: 1fr; }
+    .step { padding-left: 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-content">
+    <div class="badge">Developer Field Guide</div>
+    <div class="k9s-ascii"> ___  __  ____  ____
+| |_/ / / __ \/ ___|
+|  _ < | (__) \__ \
+|_| \_\ \____/___/</div>
+    <h1>The <span>k9s</span> Guide for<br>Rails on Kubernetes</h1>
+    <p>Everything you need to debug, inspect, and manage your deployed Rails application across dev servers.</p>
+  </div>
+</div>
+
+<nav class="toc">
+  <div class="toc-inner">
+    <a href="#setup">Setup</a>
+    <a href="#navigate">Navigate Devs</a>
+    <a href="#rails-console">Rails Console</a>
+    <a href="#server-logs">Server Logs</a>
+    <a href="#worker-logs">Worker Logs</a>
+    <a href="#restart">Restart Pods</a>
+    <a href="#edit-files">Edit Files</a>
+    <a href="#hotkeys">Hotkeys</a>
+    <a href="#extras">Extra Commands</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- SETUP -->
+  <div class="section" id="setup">
+    <div class="section-header">
+      <div class="section-icon blue">⚡</div>
+      <h2>Installation & Setup</h2>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>terminal</div>
+      <pre><span class="comment"># Install k9s</span>
+<span class="cmd">brew install</span> derailed/k9s/k9s          <span class="comment"># macOS</span>
+<span class="cmd">snap install</span> k9s                        <span class="comment"># Linux</span>
+<span class="cmd">choco install</span> k9s                       <span class="comment"># Windows</span>
+
+<span class="comment"># Verify</span>
+<span class="cmd">k9s</span> <span class="flag">version</span>
+
+<span class="comment"># Launch (uses current kubectl context)</span>
+<span class="cmd">k9s</span></pre>
+    </div>
+    <div class="tip">
+      <div class="tip-icon">💡</div>
+      <div class="tip-content"><strong>Prerequisite:</strong> Make sure <code>kubectl</code> is installed and your <code>~/.kube/config</code> has contexts for each environment.</div>
+    </div>
+  </div>
+
+  <!-- NAVIGATE DEV ENVIRONMENTS -->
+  <div class="section" id="navigate">
+    <div class="section-header">
+      <div class="section-icon green">🔀</div>
+      <h2>Access a Specific Dev Environment</h2>
+    </div>
+    <p>Each dev environment (dev1, dev2, dev3…) is typically a Kubernetes <strong>namespace</strong>.</p>
+
+    <h3>Option A — Launch directly into a namespace</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>terminal</div>
+      <pre><span class="comment"># Jump straight into dev3</span>
+<span class="cmd">k9s</span> <span class="flag">-n</span> <span class="arg">dev3</span>
+
+<span class="comment"># Specific cluster + namespace</span>
+<span class="cmd">k9s</span> <span class="flag">--context</span> <span class="arg">production-cluster</span> <span class="flag">-n</span> <span class="arg">dev5</span></pre>
+    </div>
+
+    <h3>Option B — Switch from inside k9s</h3>
+    <div class="steps">
+      <div class="step"><h4>Open namespace picker</h4><p>Type <code>:ns</code> and press Enter</p></div>
+      <div class="step"><h4>Filter for your dev</h4><p>Press <code>/</code> and type <code>dev3</code></p></div>
+      <div class="step"><h4>Select & switch</h4><p>Arrow to your namespace and press Enter</p></div>
+      <div class="step"><h4>View pods</h4><p>Type <code>:pods</code> — equivalent to <code>kubectl get pods -n dev3</code></p></div>
+    </div>
+
+    <h3>Switch clusters (contexts)</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>inside k9s</div>
+      <pre><span class="key">:ctx</span>        <span class="comment"># → list all clusters → select → Enter to switch</span></pre>
+    </div>
+  </div>
+
+  <!-- RAILS CONSOLE -->
+  <div class="section" id="rails-console">
+    <div class="section-header">
+      <div class="section-icon purple">💎</div>
+      <h2>Rails Console & Shell Access</h2>
+    </div>
+    <p>Get into a running Rails pod to run <code>rails c</code>, <code>rails s</code>, or any command.</p>
+    <div class="steps">
+      <div class="step"><h4>Find your web pod</h4><p>Type <code>:pods</code> then <code>/web</code> or <code>/puma</code> or <code>/rails</code></p></div>
+      <div class="step"><h4>Shell into the pod</h4><p>Select the pod and press <code>s</code></p></div>
+      <div class="step"><h4>Run Rails commands</h4><p>You're now inside the container!</p></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>inside pod shell</div>
+      <pre><span class="comment"># Rails Console (most common for debugging)</span>
+<span class="cmd">bundle exec rails console</span>
+<span class="comment"># or</span>
+<span class="cmd">bin/rails c</span>
+
+<span class="comment"># Rails Server (usually already running via Puma)</span>
+<span class="cmd">bundle exec rails s</span> <span class="flag">-b</span> <span class="arg">0.0.0.0</span>
+
+<span class="comment"># Database tasks</span>
+<span class="cmd">bundle exec rails db:migrate:status</span>
+<span class="cmd">bundle exec rails db:migrate</span>
+
+<span class="comment"># Check routes</span>
+<span class="cmd">bundle exec rails routes</span> <span class="flag">| grep</span> <span class="arg">your_path</span>
+
+<span class="comment"># Run a specific rake task</span>
+<span class="cmd">bundle exec rake</span> <span class="arg">your_task_name</span>
+
+<span class="comment"># Quick DB connectivity check</span>
+<span class="cmd">bundle exec rails runner</span> <span class="arg">"puts ActiveRecord::Base.connection.active?"</span></pre>
+    </div>
+    <div class="tip">
+      <div class="tip-icon">💡</div>
+      <div class="tip-content"><strong>Multi-container pods:</strong> If your pod has sidecars, k9s will prompt you to choose which container. Pick <code>web</code> or <code>rails</code>.</div>
+    </div>
+    <div class="tip warn">
+      <div class="tip-icon">⚠️</div>
+      <div class="tip-content"><strong>Caution:</strong> Running <code>rails s</code> inside an already-running pod may conflict with the existing Puma process. Use <code>rails c</code> for debugging.</div>
+    </div>
+  </div>
+
+  <!-- SERVER LOGS -->
+  <div class="section" id="server-logs">
+    <div class="section-header">
+      <div class="section-icon cyan">📋</div>
+      <h2>View Server Logs (Rails / Web)</h2>
+    </div>
+    <p>Tail live Rails application logs directly from your web pods.</p>
+    <div class="steps">
+      <div class="step"><h4>Find your web pod</h4><p><code>:pods</code> → <code>/web</code> or <code>/puma</code></p></div>
+      <div class="step"><h4>Open logs</h4><p>Select pod → press <code>l</code> to start tailing in real time</p></div>
+      <div class="step"><h4>Filter & navigate</h4><p>Use the controls below to search and manage the log view</p></div>
+    </div>
+
+    <h3>Log View Controls</h3>
+    <div class="hotkey-grid">
+      <div class="hotkey"><kbd>l</kbd> <span>Open logs for selected pod</span></div>
+      <div class="hotkey"><kbd>/</kbd> <span>Search / filter within logs</span></div>
+      <div class="hotkey"><kbd>w</kbd> <span>Toggle line wrapping</span></div>
+      <div class="hotkey"><kbd>s</kbd> <span>Toggle auto-scroll</span></div>
+      <div class="hotkey"><kbd>0</kbd> <span>Show all logs (since start)</span></div>
+      <div class="hotkey"><kbd>1</kbd> <span>Last 1 minute</span></div>
+      <div class="hotkey"><kbd>5</kbd> <span>Last 5 minutes</span></div>
+      <div class="hotkey"><kbd>p</kbd> <span>Previous container (crashed)</span></div>
+      <div class="hotkey"><kbd>c</kbd> <span>Clear log screen</span></div>
+      <div class="hotkey"><kbd>Esc</kbd> <span>Exit log view</span></div>
+    </div>
+    <div class="tip success">
+      <div class="tip-icon">✅</div>
+      <div class="tip-content"><strong>Pro tip:</strong> Press <code>p</code> to see logs from a <em>previous crashed container</em> — essential for <code>CrashLoopBackOff</code> debugging.</div>
+    </div>
+
+    <h3>Filter patterns</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>in log view — press / then type</div>
+      <pre><span class="arg">Error</span>                 <span class="comment"># Error lines only</span>
+<span class="arg">ActiveRecord</span>          <span class="comment"># Database logs</span>
+<span class="arg">500</span>                   <span class="comment"># Internal server errors</span>
+<span class="arg">ActionController</span>      <span class="comment"># Controller action logs</span>
+<span class="arg">Timeout</span>               <span class="comment"># Timeout issues</span>
+<span class="arg">Memory</span>                <span class="comment"># Memory warnings</span></pre>
+    </div>
+  </div>
+
+  <!-- WORKER LOGS -->
+  <div class="section" id="worker-logs">
+    <div class="section-header">
+      <div class="section-icon orange">⚙️</div>
+      <h2>View Worker Logs (Sidekiq / Background Jobs)</h2>
+    </div>
+    <p>Workers (Sidekiq, etc.) usually run in separate pods from the web server.</p>
+    <div class="steps">
+      <div class="step"><h4>Find worker pods</h4><p><code>:pods</code> → <code>/sidekiq</code> or <code>/worker</code></p></div>
+      <div class="step"><h4>Tail logs</h4><p>Select worker pod → press <code>l</code></p></div>
+      <div class="step"><h4>Filter by job name</h4><p>Press <code>/</code> → type job class name, e.g., <code>SendEmailJob</code></p></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>worker log filters</div>
+      <pre><span class="arg">WARN</span>                  <span class="comment"># Warnings</span>
+<span class="arg">ERROR</span>                 <span class="comment"># Errors</span>
+<span class="arg">fail</span>                  <span class="comment"># Failed jobs</span>
+<span class="arg">retry</span>                 <span class="comment"># Retried jobs</span>
+<span class="arg">dead</span>                  <span class="comment"># Dead (exhausted retries)</span>
+<span class="arg">YourJobClassName</span>      <span class="comment"># Specific job class</span></pre>
+    </div>
+    <div class="tip">
+      <div class="tip-icon">💡</div>
+      <div class="tip-content"><strong>Shell into workers:</strong> Press <code>s</code> on a worker pod to run <code>rails c</code> and inspect queues or retry jobs.</div>
+    </div>
+    <h3>Quick workflow</h3>
+    <div class="workflow">
+      <div class="wf-step">:pods</div><span class="wf-arrow">→</span>
+      <div class="wf-step">/sidekiq</div><span class="wf-arrow">→</span>
+      <div class="wf-step">Select pod</div><span class="wf-arrow">→</span>
+      <div class="wf-step">l for logs</div><span class="wf-arrow">→</span>
+      <div class="wf-step">/ERROR to filter</div>
+    </div>
+  </div>
+
+  <!-- RESTART PODS -->
+  <div class="section" id="restart">
+    <div class="section-header">
+      <div class="section-icon red">🔄</div>
+      <h2>Restart Pods</h2>
+    </div>
+
+    <h3>Method 1 — Delete pod (auto-recreated)</h3>
+    <div class="steps">
+      <div class="step"><h4>Find the pod</h4><p><code>:pods</code> → navigate to target</p></div>
+      <div class="step"><h4>Delete it</h4><p>Press <code>Ctrl+d</code> → confirm. K8s spins up a new one automatically.</p></div>
+    </div>
+    <div class="tip warn">
+      <div class="tip-icon">⚠️</div>
+      <div class="tip-content"><strong>Note:</strong> Only works if managed by a Deployment/ReplicaSet. Standalone pods won't be recreated.</div>
+    </div>
+
+    <h3>Method 2 — Rolling restart (entire deployment)</h3>
+    <div class="steps">
+      <div class="step"><h4>Go to deployments</h4><p>Type <code>:deploy</code></p></div>
+      <div class="step"><h4>Find & select</h4><p>Filter with <code>/web</code> or <code>/worker</code></p></div>
+      <div class="step"><h4>Restart</h4><p>Press <code>r</code> for a rolling restart</p></div>
+    </div>
+
+    <h3>Method 3 — Scale down & up</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>restart methods summary</div>
+      <pre><span class="comment"># Single pod restart</span>
+<span class="key">:pods</span> → select pod → <span class="cmd">Ctrl+d</span> → confirm
+
+<span class="comment"># Rolling restart (all pods in deployment)</span>
+<span class="key">:deploy</span> → select deployment → <span class="cmd">r</span>
+
+<span class="comment"># Scale to 0 then back up (nuclear option)</span>
+<span class="key">:deploy</span> → select → <span class="cmd">s</span> → type <span class="arg">0</span> → Enter
+<span class="comment"># wait, then:</span>
+<span class="key">:deploy</span> → select → <span class="cmd">s</span> → type <span class="arg">1</span> → Enter</pre>
+    </div>
+  </div>
+
+  <!-- EDIT FILES -->
+  <div class="section" id="edit-files">
+    <div class="section-header">
+      <div class="section-icon yellow">📝</div>
+      <h2>Modify Files Inside Pods</h2>
+    </div>
+    <p>Quick file edits inside a running container for debugging.</p>
+    <div class="steps">
+      <div class="step"><h4>Shell into the pod</h4><p><code>:pods</code> → select → press <code>s</code></p></div>
+      <div class="step"><h4>Navigate to app dir</h4><p>Usually <code>cd /app</code> or <code>cd /rails</code></p></div>
+      <div class="step"><h4>Edit files</h4><p>Use the editor options below</p></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>inside pod — editing files</div>
+      <pre><span class="cmd">cd</span> <span class="arg">/app</span>
+
+<span class="comment"># vi/vim (usually available)</span>
+<span class="cmd">vi</span> <span class="arg">app/controllers/some_controller.rb</span>
+
+<span class="comment"># Install nano if needed</span>
+<span class="cmd">apt-get update && apt-get install -y nano</span>
+<span class="cmd">nano</span> <span class="arg">app/controllers/some_controller.rb</span>
+
+<span class="comment"># sed for quick find-and-replace</span>
+<span class="cmd">sed -i</span> <span class="flag">'s/old_text/new_text/g'</span> <span class="arg">app/models/user.rb</span>
+
+<span class="comment"># Overwrite a file</span>
+<span class="cmd">cat</span> > <span class="arg">config/some_config.yml</span> << 'EOF'
+your_content_here
+EOF
+
+<span class="comment"># Append a debug line</span>
+<span class="cmd">echo</span> <span class="flag">"Rails.logger.info 'DEBUG: here'"</span> >> <span class="arg">app/models/user.rb</span>
+
+<span class="comment"># View files</span>
+<span class="cmd">cat</span> <span class="arg">app/controllers/some_controller.rb</span>
+<span class="cmd">head -50</span> <span class="arg">app/controllers/some_controller.rb</span>
+<span class="cmd">grep -rn</span> <span class="flag">"some_method"</span> <span class="arg">app/</span></pre>
+    </div>
+    <div class="tip danger">
+      <div class="tip-icon">🚨</div>
+      <div class="tip-content"><strong>Important:</strong> File changes are <em>temporary</em> — lost on pod restart. Commit real fixes to Git and redeploy.</div>
+    </div>
+
+    <h3>Copy files to/from pods</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>terminal (outside k9s)</div>
+      <pre><span class="comment"># Copy FROM pod → local</span>
+<span class="cmd">kubectl cp</span> <span class="arg">dev3/pod-name:/app/config/database.yml</span> <span class="flag">./database.yml</span>
+
+<span class="comment"># Copy TO pod from local</span>
+<span class="cmd">kubectl cp</span> <span class="flag">./fixed_file.rb</span> <span class="arg">dev3/pod-name:/app/app/models/fixed_file.rb</span>
+
+<span class="comment"># Specify container for multi-container pods</span>
+<span class="cmd">kubectl cp</span> <span class="flag">./fix.rb</span> <span class="arg">dev3/pod-name:/app/fix.rb</span> <span class="flag">-c web</span></pre>
+    </div>
+
+    <h3>Edit Kubernetes resource YAML</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>inside k9s</div>
+      <pre><span class="comment"># Edit ConfigMap, Deployment, Secret, etc.</span>
+<span class="key">:cm</span> → select → <span class="cmd">e</span>       <span class="comment"># Edit ConfigMap YAML</span>
+<span class="key">:deploy</span> → select → <span class="cmd">e</span>   <span class="comment"># Edit Deployment YAML</span>
+<span class="key">:sec</span> → select → <span class="cmd">e</span>      <span class="comment"># Edit Secret YAML</span></pre>
+    </div>
+  </div>
+
+  <!-- HOTKEYS -->
+  <div class="section" id="hotkeys">
+    <div class="section-header">
+      <div class="section-icon blue">⌨️</div>
+      <h2>Complete Hotkeys Reference</h2>
+    </div>
+
+    <h3>Global Navigation</h3>
+    <div class="hotkey-grid">
+      <div class="hotkey"><kbd>:</kbd> <span>Command mode</span></div>
+      <div class="hotkey"><kbd>/</kbd> <span>Filter / search</span></div>
+      <div class="hotkey"><kbd>Enter</kbd> <span>Select / drill into</span></div>
+      <div class="hotkey"><kbd>Esc</kbd> <span>Go back / cancel</span></div>
+      <div class="hotkey"><kbd>?</kbd> <span>Show help</span></div>
+      <div class="hotkey"><kbd>Ctrl+a</kbd> <span>All aliases</span></div>
+      <div class="hotkey"><kbd>q</kbd> <span>Quit k9s</span></div>
+    </div>
+
+    <h3>Pod Actions</h3>
+    <div class="hotkey-grid">
+      <div class="hotkey"><kbd>l</kbd> <span>View logs</span></div>
+      <div class="hotkey"><kbd>s</kbd> <span>Shell into pod</span></div>
+      <div class="hotkey"><kbd>d</kbd> <span>Describe resource</span></div>
+      <div class="hotkey"><kbd>y</kbd> <span>View YAML</span></div>
+      <div class="hotkey"><kbd>e</kbd> <span>Edit resource YAML</span></div>
+      <div class="hotkey"><kbd>Ctrl+d</kbd> <span>Delete resource</span></div>
+      <div class="hotkey"><kbd>Shift+f</kbd> <span>Port forward</span></div>
+      <div class="hotkey"><kbd>r</kbd> <span>Restart deployment</span></div>
+    </div>
+
+    <h3>Log Controls</h3>
+    <div class="hotkey-grid">
+      <div class="hotkey"><kbd>/</kbd> <span>Search logs</span></div>
+      <div class="hotkey"><kbd>w</kbd> <span>Toggle wrap</span></div>
+      <div class="hotkey"><kbd>s</kbd> <span>Toggle auto-scroll</span></div>
+      <div class="hotkey"><kbd>p</kbd> <span>Previous container</span></div>
+      <div class="hotkey"><kbd>c</kbd> <span>Clear screen</span></div>
+      <div class="hotkey"><kbd>0</kbd> <span>All logs</span></div>
+      <div class="hotkey"><kbd>1-9</kbd> <span>Last N minutes</span></div>
+    </div>
+
+    <h3>Sorting</h3>
+    <div class="hotkey-grid">
+      <div class="hotkey"><kbd>Shift+n</kbd> <span>Sort by name</span></div>
+      <div class="hotkey"><kbd>Shift+a</kbd> <span>Sort by age</span></div>
+      <div class="hotkey"><kbd>Shift+s</kbd> <span>Sort by status</span></div>
+      <div class="hotkey"><kbd>Shift+r</kbd> <span>Sort by restarts</span></div>
+      <div class="hotkey"><kbd>Shift+c</kbd> <span>Sort by CPU</span></div>
+      <div class="hotkey"><kbd>Shift+m</kbd> <span>Sort by memory</span></div>
+    </div>
+
+    <h3>Resource Commands</h3>
+    <div class="hotkey-grid">
+      <div class="hotkey"><kbd>:pods</kbd> <span>Pods</span></div>
+      <div class="hotkey"><kbd>:deploy</kbd> <span>Deployments</span></div>
+      <div class="hotkey"><kbd>:svc</kbd> <span>Services</span></div>
+      <div class="hotkey"><kbd>:ns</kbd> <span>Namespaces</span></div>
+      <div class="hotkey"><kbd>:ctx</kbd> <span>Contexts (clusters)</span></div>
+      <div class="hotkey"><kbd>:cm</kbd> <span>Config maps</span></div>
+      <div class="hotkey"><kbd>:sec</kbd> <span>Secrets</span></div>
+      <div class="hotkey"><kbd>:ing</kbd> <span>Ingress</span></div>
+      <div class="hotkey"><kbd>:events</kbd> <span>Events</span></div>
+      <div class="hotkey"><kbd>:pv</kbd> <span>Persistent volumes</span></div>
+      <div class="hotkey"><kbd>:cj</kbd> <span>Cron jobs</span></div>
+      <div class="hotkey"><kbd>:jobs</kbd> <span>Jobs</span></div>
+      <div class="hotkey"><kbd>:sa</kbd> <span>Service accounts</span></div>
+      <div class="hotkey"><kbd>:no</kbd> <span>Nodes</span></div>
+      <div class="hotkey"><kbd>:rs</kbd> <span>Replica sets</span></div>
+      <div class="hotkey"><kbd>:pf</kbd> <span>Port forwards</span></div>
+      <div class="hotkey"><kbd>:pulse</kbd> <span>Cluster pulse</span></div>
+      <div class="hotkey"><kbd>:xray</kbd> <span>XRAY tree view</span></div>
+    </div>
+  </div>
+
+  <!-- EXTRAS -->
+  <div class="section" id="extras">
+    <div class="section-header">
+      <div class="section-icon purple">🚀</div>
+      <h2>Extra Commands & Tips</h2>
+    </div>
+
+    <h3>Debugging common issues</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>inside k9s</div>
+      <pre><span class="comment"># Check why a pod won't start</span>
+<span class="key">:events</span>               <span class="comment"># → OOMKilled, ImagePullBackOff, etc.</span>
+
+<span class="comment"># View config maps (ENV vars)</span>
+<span class="key">:cm</span>                   <span class="comment"># → find app config → Enter to view</span>
+
+<span class="comment"># View & decode secrets</span>
+<span class="key">:sec</span>                  <span class="comment"># → select → d to describe → x to decode</span>
+
+<span class="comment"># Check ingress / routing</span>
+<span class="key">:ing</span>                  <span class="comment"># → routing rules & backends</span>
+
+<span class="comment"># CronJobs & Jobs</span>
+<span class="key">:cj</span>                   <span class="comment"># → scheduled tasks</span>
+<span class="key">:jobs</span>                 <span class="comment"># → one-off job runs</span>
+
+<span class="comment"># Cluster health</span>
+<span class="key">:pulse</span>                <span class="comment"># → cluster dashboard</span>
+
+<span class="comment"># Node status</span>
+<span class="key">:no</span>                   <span class="comment"># → health, capacity, conditions</span>
+
+<span class="comment"># XRAY — hierarchical tree</span>
+<span class="key">:xray</span> <span class="arg">deploy</span>         <span class="comment"># → deploy → replicaset → pods</span></pre>
+    </div>
+
+    <h3>Port forwarding (access Rails locally)</h3>
+    <div class="steps">
+      <div class="step"><h4>Select pod or service</h4><p><code>:pods</code> or <code>:svc</code> → find your Rails app</p></div>
+      <div class="step"><h4>Port forward</h4><p>Press <code>Shift+f</code> → set local:container ports (e.g., 3000:3000)</p></div>
+      <div class="step"><h4>Open browser</h4><p>Go to <code>http://localhost:3000</code></p></div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>manage port forwards</div>
+      <pre><span class="key">:pf</span>                  <span class="comment"># → list active forwards → Ctrl+d to stop</span></pre>
+    </div>
+
+    <h3>Useful shell commands inside pods</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>inside pod shell</div>
+      <pre><span class="comment"># Processes, memory, disk</span>
+<span class="cmd">ps aux</span>
+<span class="cmd">free -h</span>
+<span class="cmd">df -h</span>
+
+<span class="comment"># Network checks</span>
+<span class="cmd">curl -I</span> <span class="arg">http://some-service:3000/health</span>
+<span class="cmd">nslookup</span> <span class="arg">database-service</span>
+
+<span class="comment"># Environment variables</span>
+<span class="cmd">env | sort</span>
+<span class="cmd">env | grep -i</span> <span class="arg">DATABASE</span>
+<span class="cmd">env | grep -i</span> <span class="arg">REDIS</span>
+<span class="cmd">env | grep -i</span> <span class="arg">SECRET</span>
+
+<span class="comment"># Tail Rails logs</span>
+<span class="cmd">tail -f</span> <span class="arg">log/production.log</span>
+
+<span class="comment"># Gem versions</span>
+<span class="cmd">bundle list | grep</span> <span class="arg">sidekiq</span>
+
+<span class="comment"># Redis connectivity</span>
+<span class="cmd">redis-cli -h</span> <span class="arg">$REDIS_HOST</span> <span class="flag">ping</span>
+
+<span class="comment"># Quick DB check</span>
+<span class="cmd">bundle exec rails runner</span> <span class="arg">"puts User.count"</span>
+
+<span class="comment"># Find large files</span>
+<span class="cmd">find /app -type f -size +10M</span>
+
+<span class="comment"># Check open connections</span>
+<span class="cmd">netstat -tlnp</span> 2>/dev/null || <span class="cmd">ss -tlnp</span></pre>
+    </div>
+
+    <div class="tip success">
+      <div class="tip-icon">🎯</div>
+      <div class="tip-content"><strong>Daily Cheat Sheet:</strong> <code>k9s -n dev3</code> → <code>:pods</code> → <code>/web</code> → <code>l</code> (logs) or <code>s</code> (shell) → debug → <code>Esc</code> back</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>k9s Field Guide — Built for the PlanRadar team &nbsp;·&nbsp; <a href="https://k9scli.io" target="_blank">k9scli.io</a> &nbsp;·&nbsp; <a href="https://github.com/derailed/k9s" target="_blank">GitHub</a></p>
+</div>
+
+</body>
+</html>
