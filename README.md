@@ -58,7 +58,7 @@ Analyzes Jira user stories and Figma designs, maps them together, detects mismat
 
 ### Output
 
-- Local file: `requirements-analysis-[date].md`
+- Local file: `.plans/requirements-analysis-[date].md`
 - Confluence page created automatically under the configured folder
 
 ---
@@ -75,18 +75,18 @@ Creates a phased implementation plan by combining Jira stories, Confluence specs
   --thoughts "Queue-based approach with Redis"
 ```
 
-**Output:** `implementation-plan-PROJ-123-2026-02-15.md`
+**Output:** `.plans/implementation-plan-PROJ-123-2026-02-15.md`
 
 ### Revision Mode (mid-implementation changes)
 
 Pass an existing plan file instead of a Jira URL to enter revision mode:
 
 ```bash
-/plan-implementation ./implementation-plan-PROJ-123-2026-02-15.md \
+/plan-implementation ./.plans/implementation-plan-PROJ-123-2026-02-15.md \
   --thoughts "Bulk delete locks the table, need batched soft deletes instead"
 ```
 
-**Output:** `implementation-plan-PROJ-123-2026-02-15-rev-1.md`
+**Output:** `.plans/implementation-plan-PROJ-123-2026-02-15-rev-1.md`
 
 Key behaviors in revision mode:
 - Discusses the proposed changes with you before writing
@@ -97,8 +97,8 @@ Key behaviors in revision mode:
 
 | Flag | Description |
 |------|-------------|
-| `--confluence <urls>` | One or more Confluence page URLs with specs |
-| `--thoughts <text>` | Your initial implementation ideas or constraints |
+| `--confluence <urls>` | One or more Confluence page URLs with specs (optional in full mode) |
+| `--thoughts <text>` | Your implementation ideas or constraints (**required** in both modes) |
 
 ---
 
@@ -109,8 +109,14 @@ Takes an implementation plan and executes it phase by phase. This is an **intera
 ### Usage
 
 ```bash
-/implement-plan ./implementation-plan-PROJ-123-2026-02-15.md
+# With explicit path
+/implement-plan ./.plans/implementation-plan-PROJ-123-2026-02-15.md
+
+# Auto-detect latest plan
+/implement-plan
 ```
+
+If no file path is provided, it auto-detects the latest plan from the `.plans/` folder.
 
 ### What It Does
 
@@ -132,8 +138,14 @@ Identical to `/implement-plan` but with one key addition: it generates and conti
 ### Usage
 
 ```bash
-/implement-plan-nicely ./implementation-plan-PROJ-123-2026-02-15.md
+# With explicit path
+/implement-plan-nicely ./.plans/implementation-plan-PROJ-123-2026-02-15.md
+
+# Auto-detect latest plan
+/implement-plan-nicely
 ```
+
+If no file path is provided, it auto-detects the latest plan from the `.plans/` folder.
 
 ### What It Does
 
@@ -162,7 +174,7 @@ Reviews code changes and generates an interactive HTML report with categorized f
 /review
 
 # Review with plan reference (checks if plan needs updating)
-/review --plan ./implementation-plan-PROJ-123-2026-02-15.md
+/review --plan ./.plans/implementation-plan-PROJ-123-2026-02-15.md
 ```
 
 ### Remote Mode — review a Merge Request
@@ -194,7 +206,7 @@ Every review checks for: N+1 queries, performance issues, security vulnerabiliti
 
 ## `/documentation`
 
-Creates or updates Confluence API documentation by analyzing the codebase and the implementation plan.
+Creates or updates Confluence API documentation by analyzing the codebase and the implementation plan. In both New and Update modes, it **updates Swagger docs (via rswag) before generating the Confluence documentation**.
 
 ### New Mode — create a new documentation page
 

@@ -218,7 +218,8 @@ Both the local markdown file and the Confluence page must have the **exact same 
 
 ### Save Locally
 
-Save as `requirements-analysis-[date].md` in the current directory.
+1. Create the `.plans` folder in the current project root if it doesn't exist
+2. Save as `.plans/requirements-analysis-[date].md`
 
 ### Publish to Confluence
 

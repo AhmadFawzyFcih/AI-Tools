@@ -156,7 +156,7 @@ Re-present the file to the user after each update.
 
 5. Analyze and compare
 6. Generate the requirements analysis report (Story Summary + Mismatches & Unclear Points)
-7. Save locally as `requirements-analysis-[date].md`
+7. Save locally as `.plans/requirements-analysis-[date].md` (create `.plans` folder if it doesn't exist)
 8. Publish to Confluence under PMT folder (ID: `4040359987`)
 
 → Update dashboard: Stage 1 ✅
@@ -188,7 +188,7 @@ Wait for confirmation or additional thoughts.
 3. Deep analysis (scope, edge cases, performance, maintainability)
 4. Build phased plan
 
-5. Save as `implementation-plan-[STORY-IDS]-[date].md`
+5. Save as `.plans/implementation-plan-[STORY-IDS]-[date].md` (create `.plans` folder if it doesn't exist)
 
 → Update dashboard: Stage 2 ✅
 → Record plan file path for Stage 3
