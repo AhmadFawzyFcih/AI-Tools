@@ -212,7 +212,7 @@ Creates or updates Confluence API documentation by analyzing the codebase and th
 
 ```bash
 /documentation --new https://planradar.atlassian.net/wiki/spaces/PMT/folder/4040359987 \
-  ./implementation-plan-PROJ-123-2026-02-15.md \
+  ./.plans/implementation-plan-PROJ-123-2026-02-15.md \
   --thoughts "Checklist field feature, covers CRUD and bulk operations"
 ```
 
@@ -220,7 +220,7 @@ Creates or updates Confluence API documentation by analyzing the codebase and th
 
 ```bash
 /documentation https://planradar.atlassian.net/wiki/spaces/PMT/pages/4031676438/CheckList+Field+Documentation \
-  ./implementation-plan-PROJ-123-2026-02-15.md \
+  ./.plans/implementation-plan-PROJ-123-2026-02-15.md \
   --thoughts "Added bulk delete endpoint, updated the update endpoint for partial updates"
 ```
 
