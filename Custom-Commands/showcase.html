@@ -149,6 +149,7 @@
   }
   .badge-analyze { background: var(--cyan-soft); color: var(--cyan); }
   .badge-plan    { background: var(--orange-soft); color: var(--orange); }
+  .badge-fix     { background: rgba(248,81,73,0.12); color: var(--red); }
   .badge-build   { background: var(--green-soft); color: var(--green); }
   .badge-review  { background: var(--purple-soft); color: var(--purple); }
   .badge-docs    { background: var(--pink-soft); color: var(--pink); }
@@ -357,6 +358,13 @@
     </div>
     <span class="pipeline-arrow">&#8594;</span>
     <div class="pipeline-step">
+      <a class="step-box" href="#fix-bug" style="border-color: var(--red); background: rgba(248,81,73,0.08);">
+        <span class="step-num" style="background: var(--red);">2+</span>
+        /fix-bug
+      </a>
+    </div>
+    <span class="pipeline-arrow">&#8594;</span>
+    <div class="pipeline-step">
       <a class="step-box" href="#implement-plan">
         <span class="step-num">3</span>
         /implement-plan
@@ -425,7 +433,7 @@
 <span class="cmd">/analyze-requirements</span> <span class="string">PROJ-123</span>
         </div>
         <div class="output-line">
-          <span class="arrow">&#8594;</span> <code>.plans/requirements-analysis-2026-02-15.md</code> + Confluence page
+          <span class="arrow">&#8594;</span> <code>requirements-analysis-2026-02-15.md</code> + Confluence page
         </div>
       </div>
     </div>
@@ -500,7 +508,7 @@
   <span class="flag">--figma</span> <span class="url">https://www.figma.com/design/abc/File1</span>
         </div>
         <div class="output-line">
-          <span class="arrow">&#8594;</span> <code>.plans/requirements-analysis-2026-02-15.md</code> + Confluence page
+          <span class="arrow">&#8594;</span> <code>requirements-analysis-2026-02-15.md</code> + Confluence page
         </div>
       </div>
     </div>
@@ -558,7 +566,7 @@
   <span class="flag">--thoughts</span> <span class="string">"Queue-based approach with Redis"</span>
         </div>
         <div class="output-line">
-          <span class="arrow">&#8594;</span> <code>.plans/implementation-plan-PROJ-123-2026-02-15.md</code>
+          <span class="arrow">&#8594;</span> <code>implementation-plan-PROJ-123-2026-02-15.md</code>
         </div>
       </div>
     </div>
@@ -584,7 +592,7 @@
   <span class="flag">--thoughts</span> <span class="string">"CQRS with separate read and write models"</span>
         </div>
         <div class="output-line">
-          <span class="arrow">&#8594;</span> <code>.plans/implementation-plan-PROJ-123-PROJ-456-2026-02-15.md</code>
+          <span class="arrow">&#8594;</span> <code>implementation-plan-PROJ-123-PROJ-456-2026-02-15.md</code>
         </div>
       </div>
     </div>
@@ -602,11 +610,11 @@
         <p>Something changed mid-implementation? Pass the existing plan file instead of a Jira URL. The command discusses the changes with you first, then creates a new revision file. <strong>Never overwrites the original.</strong></p>
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<span class="cmd">/plan-implementation</span> <span class="file">./.plans/implementation-plan-PROJ-123-2026-02-15.md</span> \
+<span class="cmd">/plan-implementation</span> <span class="file">./implementation-plan-PROJ-123-2026-02-15.md</span> \
   <span class="flag">--thoughts</span> <span class="string">"Bulk delete locks the table, need batched soft deletes instead"</span>
         </div>
         <div class="output-line">
-          <span class="arrow">&#8594;</span> <code>.plans/implementation-plan-PROJ-123-2026-02-15-rev-1.md</code>
+          <span class="arrow">&#8594;</span> <code>implementation-plan-PROJ-123-2026-02-15-rev-1.md</code>
         </div>
         <p style="margin-top: 12px; color: var(--orange); font-size: 0.8rem;">
           The revision file works directly with <code>/implement-plan</code> to continue development.
@@ -623,14 +631,98 @@
     <tbody>
       <tr>
         <td><code>--confluence &lt;urls&gt;</code></td>
-        <td>One or more Confluence page URLs containing feature specs (optional in full mode)</td>
+        <td>One or more Confluence page URLs containing feature specs</td>
       </tr>
       <tr>
         <td><code>--thoughts &lt;text&gt;</code></td>
-        <td>Your implementation ideas, constraints, or approach (<strong>required</strong> in both modes)</td>
+        <td>Your initial implementation ideas, constraints, or approach</td>
       </tr>
     </tbody>
   </table>
+</section>
+
+<hr class="divider">
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- FIX BUG -->
+<!-- ════════════════════════════════════════════════════ -->
+<section class="command-section" id="fix-bug">
+  <div class="command-header">
+    <h2>/fix-bug</h2>
+    <span class="command-badge badge-fix">Debug</span>
+  </div>
+  <p class="command-desc">
+    Investigates a bug reported in Jira — fetches the ticket, traces the root cause through the codebase, presents findings, and creates a fix plan compatible with <code>/implement-plan</code>.
+  </p>
+
+  <div class="examples-grid">
+
+    <!-- Jira link only -->
+    <div class="example-card open">
+      <div class="example-label" onclick="toggle(this)">
+        <div class="example-label-left">
+          <h3>Jira link only</h3>
+        </div>
+        <span class="example-chevron">&#9654;</span>
+      </div>
+      <div class="example-body">
+        <p>Point it to a Jira bug ticket. The command fetches the ticket, investigates the codebase, and walks you through the root cause before creating a fix plan.</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="cmd">/fix-bug</span> <span class="url">https://planradar.atlassian.net/browse/PROJ-123</span>
+        </div>
+        <div class="output-line">
+          <span class="arrow">&#8594;</span> <code>.plans/bugfix-PROJ-123-2026-03-17.md</code>
+        </div>
+      </div>
+    </div>
+
+    <!-- With developer hints -->
+    <div class="example-card">
+      <div class="example-label" onclick="toggle(this)">
+        <div class="example-label-left">
+          <h3>With developer hints</h3>
+        </div>
+        <span class="example-chevron">&#9654;</span>
+      </div>
+      <div class="example-body">
+        <p>Add <code>--thoughts</code> to give hints about the suspected area, reproduction details, or initial observations to speed up the investigation.</p>
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<span class="cmd">/fix-bug</span> <span class="url">https://planradar.atlassian.net/browse/PROJ-123</span> \
+  <span class="flag">--thoughts</span> <span class="string">"Happens only when the user has more than 50 projects, probably an N+1 or timeout issue"</span>
+        </div>
+        <div class="output-line">
+          <span class="arrow">&#8594;</span> <code>.plans/bugfix-PROJ-123-2026-03-17.md</code>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <table class="flags-table">
+    <thead>
+      <tr><th>Flag</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>--thoughts &lt;text&gt;</code></td>
+        <td>Optional hints about the bug — suspected area, reproduction notes, or initial observations</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin-top: 20px;">
+    <h4 style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px;">Interactive Flow</h4>
+    <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem;">
+      <div><span style="color: var(--red); font-weight: 600;">1.</span> Fetches the Jira ticket — title, description, steps to reproduce, comments, attachments</div>
+      <div><span style="color: var(--red); font-weight: 600;">2.</span> Investigates root cause — traces execution paths, checks for common Rails issues (N+1, race conditions, missing validations, etc.)</div>
+      <div><span style="color: var(--red); font-weight: 600;">3.</span> Reviews recent changes and existing specs for the affected code</div>
+      <div><span style="color: var(--red); font-weight: 600;">4.</span> Presents structured findings — where, what, why, and impact</div>
+      <div><span style="color: var(--red); font-weight: 600;">5.</span> <strong>Waits for your confirmation</strong> before creating the fix plan</div>
+      <div><span style="color: var(--red); font-weight: 600;">6.</span> Creates a fix plan in <code>.plans/bugfix-*.md</code> — compatible with <code>/implement-plan</code></div>
+    </div>
+  </div>
 </section>
 
 <hr class="divider">
@@ -658,31 +750,11 @@
         <span class="example-chevron">&#9654;</span>
       </div>
       <div class="example-body">
-        <p>Point it to a plan file generated by <code>/plan-implementation</code>. The command reads the plan, walks through architecture decisions with you, then implements phase by phase.</p>
+        <p>Point it to a plan file generated by <code>/plan-implementation</code> or <code>/fix-bug</code>. The command reads the plan, walks through architecture decisions with you, then implements phase by phase.</p>
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<span class="cmd">/implement-plan</span> <span class="file">./.plans/implementation-plan-PROJ-123-2026-02-15.md</span>
+<span class="cmd">/implement-plan</span> <span class="file">./implementation-plan-PROJ-123-2026-02-15.md</span>
         </div>
-      </div>
-    </div>
-
-    <!-- Auto-detect -->
-    <div class="example-card">
-      <div class="example-label" onclick="toggle(this)">
-        <div class="example-label-left">
-          <h3>Auto-detect latest plan</h3>
-        </div>
-        <span class="example-chevron">&#9654;</span>
-      </div>
-      <div class="example-body">
-        <p>No argument needed. Auto-detects the most recently modified plan file from the <code>.plans/</code> folder.</p>
-        <div class="code-block">
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<span class="cmd">/implement-plan</span>
-        </div>
-        <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.8rem;">
-          Picks the newest <code>implementation-plan-*.md</code> file in <code>.plans/</code> by modification time.
-        </p>
       </div>
     </div>
 
@@ -698,7 +770,7 @@
         <p>After using <code>/plan-implementation</code> in revision mode, pass the new revision file to continue development with the updated plan.</p>
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<span class="cmd">/implement-plan</span> <span class="file">./.plans/implementation-plan-PROJ-123-2026-02-15-rev-1.md</span>
+<span class="cmd">/implement-plan</span> <span class="file">./implementation-plan-PROJ-123-2026-02-15-rev-1.md</span>
         </div>
       </div>
     </div>
@@ -743,34 +815,14 @@
         <span class="example-chevron">&#9654;</span>
       </div>
       <div class="example-body">
-        <p>Point it to a plan file generated by <code>/plan-implementation</code>. Before the architecture discussion even starts, it creates a live HTML dashboard you can open in a browser.</p>
+        <p>Point it to a plan file generated by <code>/plan-implementation</code> or <code>/fix-bug</code>. Before the architecture discussion even starts, it creates a live HTML dashboard you can open in a browser.</p>
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<span class="cmd">/implement-plan-nicely</span> <span class="file">./.plans/implementation-plan-PROJ-123-2026-02-15.md</span>
+<span class="cmd">/implement-plan-nicely</span> <span class="file">./implementation-plan-PROJ-123-2026-02-15.md</span>
         </div>
         <div class="output-line">
-          <span class="arrow">&#8594;</span> <code>implementation-progress-2026-02-15-143025.html</code>
+          <span class="arrow">&#8594;</span> <code>implementation-progress-2026-02-15-143025.html</code> + <code>.json</code>
         </div>
-      </div>
-    </div>
-
-    <!-- Auto-detect -->
-    <div class="example-card">
-      <div class="example-label" onclick="toggle(this)">
-        <div class="example-label-left">
-          <h3>Auto-detect latest plan</h3>
-        </div>
-        <span class="example-chevron">&#9654;</span>
-      </div>
-      <div class="example-body">
-        <p>No argument needed. Auto-detects the most recently modified plan file from the <code>.plans/</code> folder.</p>
-        <div class="code-block">
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<span class="cmd">/implement-plan-nicely</span>
-        </div>
-        <p style="margin-top: 8px; color: var(--text-muted); font-size: 0.8rem;">
-          Picks the newest <code>implementation-plan-*.md</code> file in <code>.plans/</code> by modification time.
-        </p>
       </div>
     </div>
 
@@ -786,10 +838,10 @@
         <p>After using <code>/plan-implementation</code> in revision mode, pass the new revision file. The dashboard tracks the revised phases.</p>
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<span class="cmd">/implement-plan-nicely</span> <span class="file">./.plans/implementation-plan-PROJ-123-2026-02-15-rev-1.md</span>
+<span class="cmd">/implement-plan-nicely</span> <span class="file">./implementation-plan-PROJ-123-2026-02-15-rev-1.md</span>
         </div>
         <div class="output-line">
-          <span class="arrow">&#8594;</span> <code>implementation-progress-2026-02-15-160512.html</code>
+          <span class="arrow">&#8594;</span> <code>implementation-progress-2026-02-15-160512.html</code> + <code>.json</code>
         </div>
       </div>
     </div>
@@ -817,7 +869,7 @@
       <span style="background: var(--orange-soft); color: var(--orange); padding: 4px 12px; border-radius: 20px;">&#9888; Needs Attention</span>
     </div>
     <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 14px; line-height: 1.6;">
-      The dashboard is updated after every significant step: plan read, each architecture sub-discussion, each file created, each spec run, each phase completion. Refresh the browser to see the latest state.
+      Uses a two-file approach (HTML + JSON) for <strong style="color: var(--cyan);">live updates without page refresh</strong>. The HTML polls a JSON data file every 2 seconds — status icons change, progress bar fills, new items slide in with smooth CSS transitions. Open the dashboard once and watch it update in real-time.
     </p>
   </div>
 </section>
@@ -872,7 +924,7 @@
         <p>Review changes and check if the implementation plan needs updating. After fixes, it asks whether to create a plan revision.</p>
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-<span class="cmd">/review</span> <span class="flag">--plan</span> <span class="file">./.plans/implementation-plan-PROJ-123-2026-02-15.md</span>
+<span class="cmd">/review</span> <span class="flag">--plan</span> <span class="file">./implementation-plan-PROJ-123-2026-02-15.md</span>
         </div>
       </div>
     </div>
@@ -958,7 +1010,7 @@
     <span class="command-badge badge-docs">Docs</span>
   </div>
   <p class="command-desc">
-    Creates or updates Confluence API documentation by analyzing the codebase and the implementation plan. In both New and Update modes, it <strong>updates Swagger docs (via rswag) before generating the Confluence documentation</strong>. Includes endpoints, parameters, responses, cURL examples, and a changelog.
+    Creates or updates Confluence API documentation by analyzing the codebase and the implementation plan. Includes endpoints, parameters, responses, cURL examples, and a changelog.
   </p>
 
   <div class="examples-grid">
@@ -977,11 +1029,11 @@
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)">Copy</button>
 <span class="cmd">/documentation</span> <span class="flag">--new</span> <span class="url">https://planradar.atlassian.net/wiki/spaces/PMT/folder/4040359987</span> \
-  <span class="file">./.plans/implementation-plan-PROJ-123-2026-02-15.md</span> \
+  <span class="file">./implementation-plan-PROJ-123-2026-02-15.md</span> \
   <span class="flag">--thoughts</span> <span class="string">"Checklist field feature, covers CRUD and bulk operations"</span>
         </div>
         <div class="output-line">
-          <span class="arrow">&#8594;</span> Swagger docs updated + New Confluence page created under the specified folder
+          <span class="arrow">&#8594;</span> New Confluence page created under the specified folder
         </div>
       </div>
     </div>
@@ -1001,11 +1053,11 @@
           <button class="copy-btn" onclick="copyCode(this)">Copy</button>
 <span class="cmd">/documentation</span> \
   <span class="url">https://planradar.atlassian.net/wiki/spaces/PMT/pages/4031676438/CheckList+Field+Documentation</span> \
-  <span class="file">./.plans/implementation-plan-PROJ-123-2026-02-15.md</span> \
+  <span class="file">./implementation-plan-PROJ-123-2026-02-15.md</span> \
   <span class="flag">--thoughts</span> <span class="string">"Added bulk delete endpoint, updated the update endpoint for partial updates"</span>
         </div>
         <div class="output-line">
-          <span class="arrow">&#8594;</span> Swagger docs updated + <code>doc-review-2026-02-15-143025.html</code> then Confluence page updated
+          <span class="arrow">&#8594;</span> <code>doc-review-2026-02-15-143025.html</code> then Confluence page updated
         </div>
       </div>
     </div>
@@ -1024,7 +1076,7 @@
         <div class="code-block">
           <button class="copy-btn" onclick="copyCode(this)">Copy</button>
 <span class="cmd">/documentation</span> <span class="flag">--new</span> <span class="url">https://planradar.atlassian.net/wiki/spaces/PMT/folder/4040359987</span> \
-  <span class="file">./.plans/implementation-plan-PROJ-123-2026-02-15.md</span>
+  <span class="file">./implementation-plan-PROJ-123-2026-02-15.md</span>
         </div>
       </div>
     </div>

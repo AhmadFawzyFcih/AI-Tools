@@ -15,6 +15,7 @@ These commands rely on the following MCP servers being configured in Claude Code
 |---------|---------|
 | `/analyze-requirements` | Analyze Jira stories + Figma designs, detect mismatches |
 | `/plan-implementation` | Create a phased implementation plan from Jira + Confluence + your ideas |
+| `/fix-bug` | Investigate a Jira bug, find root cause, create a fix plan |
 | `/implement-plan` | Execute an implementation plan phase by phase with architecture discussion |
 | `/implement-plan-nicely` | Same as `/implement-plan` but with a live HTML progress dashboard |
 | `/review` | Review code changes (local or remote MR) and generate an interactive HTML report |
@@ -102,6 +103,40 @@ Key behaviors in revision mode:
 
 ---
 
+## `/fix-bug`
+
+Investigates a bug reported in Jira, traces the root cause through the codebase, presents findings, and creates a fix plan compatible with `/implement-plan`. This is an **interactive command** — it investigates step by step and discusses findings with you before creating the plan.
+
+### Usage
+
+```bash
+# Jira link only
+/fix-bug https://planradar.atlassian.net/browse/PROJ-123
+
+# Jira link + developer hints
+/fix-bug https://planradar.atlassian.net/browse/PROJ-123 --thoughts "Happens only when the user has more than 50 projects, probably an N+1 or timeout issue"
+```
+
+### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--thoughts <text>` | Optional hints about the bug — suspected area, reproduction notes, or initial observations |
+
+### What It Does
+
+1. **Fetches the Jira ticket** — title, description, steps to reproduce, comments, attachments
+2. **Investigates root cause** — traces execution paths, checks for common Rails issues (N+1, race conditions, missing validations, etc.), reviews recent changes and existing specs
+3. **Presents findings** — structured root cause analysis with where, what, why, and impact
+4. **Waits for your confirmation** before creating the fix plan
+5. **Creates a fix plan** — saved to `.plans/bugfix-[TICKET-ID]-[date].md`, compatible with `/implement-plan`
+
+### Output
+
+- Fix plan: `.plans/bugfix-[TICKET-ID]-[date].md`
+
+---
+
 ## `/implement-plan`
 
 Takes an implementation plan and executes it phase by phase. This is an **interactive command** — it discusses architecture with you, implements one phase at a time, and waits for your confirmation before advancing.
@@ -116,7 +151,7 @@ Takes an implementation plan and executes it phase by phase. This is an **intera
 /implement-plan
 ```
 
-If no file path is provided, it auto-detects the latest plan from the `.plans/` folder.
+If no file path is provided, it auto-detects the latest `implementation-plan-*.md` or `bugfix-*.md` from the `.plans/` folder.
 
 ### What It Does
 
@@ -145,21 +180,21 @@ Identical to `/implement-plan` but with one key addition: it generates and conti
 /implement-plan-nicely
 ```
 
-If no file path is provided, it auto-detects the latest plan from the `.plans/` folder.
+If no file path is provided, it auto-detects the latest `implementation-plan-*.md` or `bugfix-*.md` from the `.plans/` folder.
 
 ### What It Does
 
 Everything `/implement-plan` does, plus:
 
-1. **Generates an HTML dashboard** before the architecture discussion starts
-2. **Updates the dashboard after every significant step** — each architecture sub-discussion, each file created, each spec run, each phase completion
+1. **Generates a live HTML dashboard** (HTML + JSON two-file approach) — open once in a browser, no refresh needed
+2. **Updates in real-time** via JSON polling every 2 seconds — status icons change, progress bar fills, new items appear with smooth CSS transitions
 3. **Tracks status visually** with icons: ✅ Complete, 🔄 In Progress, ⏳ Pending, ❌ Failed, ⚠️ Needs Attention
 4. **Shows a summary section** with total files created/modified, spec results, architecture decisions, and V2 API coverage
 5. **Maintains an issues & notes log** at the bottom for spec failures, decisions, and tech debt
 
 ### Output
 
-- Dashboard file: `implementation-progress-[date]-[HHMMSS].html`
+- Dashboard: `implementation-progress-[date]-[HHMMSS].html` + `implementation-progress-[date]-[HHMMSS].json`
 
 ---
 
@@ -294,6 +329,7 @@ The pipeline pauses only at critical moments: unmapped stories/designs, before p
 ```
 1. /analyze-requirements       →  Understand what to build
 2. /plan-implementation        →  Plan how to build it
+   /fix-bug                    →  Investigate a bug and create a fix plan
 3. /implement-plan             →  Build it phase by phase
    /implement-plan-nicely      →  Build it with a live progress dashboard
 4. /review                     →  Review the code

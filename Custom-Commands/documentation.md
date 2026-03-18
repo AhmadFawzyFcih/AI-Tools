@@ -192,129 +192,15 @@ For each endpoint, you MUST include:
 
 ---
 
-## Swagger Documentation (Both Modes)
-
-**CRITICAL: Always update Swagger docs FIRST, before Confluence.**
-
-### Step A: Analyze Existing Integration Specs
-
-1. Scan `spec/integration/` (or `spec/requests/`) for existing rswag spec files
-2. Understand the existing patterns:
-   - How are specs organized (by resource, by API version)?
-   - What's the file naming convention?
-   - What response schemas are used?
-   - How are authentication and authorization handled in specs?
-3. Use the same patterns and conventions for new specs
-
-### Step B: Create/Update Integration Specs
-
-For each new or modified API endpoint found in Step 2 (Analyze Code Changes):
-
-1. **New endpoint** → Create a new rswag integration spec file following the existing folder structure:
-   ```
-   spec/integration/
-   ├── v1/
-   │   └── [resource]_spec.rb
-   └── v2/
-       └── [resource]_spec.rb
-   ```
-
-2. **Modified endpoint** → Update the existing rswag spec file to reflect the changes
-
-Each rswag spec should include:
-- `path` and `operation` matching the route
-- All `parameter` definitions (path params, query params, request body)
-- `request_body` with schema and examples for POST/PUT/PATCH
-- `response` blocks for all status codes (200, 201, 401, 403, 404, 422, etc.)
-- `schema` definitions matching the serializer/response structure
-- Realistic `example` values
-- Authentication headers (`Authorization: Bearer`)
-- Tags for grouping in Swagger UI
-
-**Example rswag spec pattern (follow existing project conventions):**
-```ruby
-require 'swagger_helper'
-
-RSpec.describe 'Api::V1::ChecklistFields', type: :request do
-  path '/api/v1/projects/{project_id}/checklist_fields' do
-    get 'List checklist fields' do
-      tags 'Checklist Fields'
-      produces 'application/json'
-      parameter name: :project_id, in: :path, type: :integer, required: true
-      parameter name: :page, in: :query, type: :integer, required: false
-      parameter name: :per_page, in: :query, type: :integer, required: false
-
-      response '200', 'checklist fields found' do
-        schema type: :array, items: { '$ref' => '#/components/schemas/ChecklistField' }
-        run_test!
-      end
-
-      response '401', 'unauthorized' do
-        run_test!
-      end
-    end
-
-    post 'Create a checklist field' do
-      tags 'Checklist Fields'
-      consumes 'application/json'
-      produces 'application/json'
-      parameter name: :project_id, in: :path, type: :integer, required: true
-      parameter name: :checklist_field, in: :body, schema: {
-        type: :object,
-        properties: {
-          field_name: { type: :string },
-          field_type: { type: :string }
-        },
-        required: %w[field_name field_type]
-      }
-
-      response '201', 'checklist field created' do
-        schema '$ref' => '#/components/schemas/ChecklistField'
-        run_test!
-      end
-
-      response '422', 'invalid request' do
-        run_test!
-      end
-    end
-  end
-end
-```
-
-**IMPORTANT**: Look at existing specs in `spec/integration/` to match the exact style, helper methods, authentication setup, and schema patterns used in this project. Do NOT use a generic template — match the project's conventions.
-
-### Step C: Run Swagger Generation
-
-After creating/updating all integration specs, run:
-
-```bash
-bundle exec rake rswag:specs:swaggerize
-```
-
-This generates/updates the Swagger JSON/YAML file from the rswag specs.
-
-- If the command **succeeds** → continue to Confluence documentation
-- If the command **fails** → show the error, fix the spec, and re-run until it passes
-
-### Step D: Verify Swagger Output
-
-1. Check that the generated swagger file (usually `swagger/v1/swagger.yaml` or `swagger/v1/swagger.json`) includes the new/updated endpoints
-2. If anything is missing, fix the integration specs and re-run
-
----
-
 ## New Mode Workflow
 
 ### Step 1: Gather Information
 Follow the "Gather Information" workflow above.
 
-### Step 2: Update Swagger
-Follow the "Swagger Documentation" workflow above (Steps A → D).
-
-### Step 3: Generate Confluence Documentation
+### Step 2: Generate Documentation
 Build the full documentation page following the structure above.
 
-### Step 4: Publish to Confluence
+### Step 3: Publish to Confluence
 
 1. Extract the folder ID from the `--new` URL
 2. **Page title**: Use a descriptive name based on the feature
@@ -336,10 +222,7 @@ Build the full documentation page following the structure above.
 ### Step 2: Gather New Information
 Follow the "Gather Information" workflow above.
 
-### Step 3: Update Swagger
-Follow the "Swagger Documentation" workflow above (Steps A → D).
-
-### Step 4: Compare & Generate Review Page
+### Step 3: Compare & Generate Review Page
 
 Determine what needs to change:
 
@@ -361,7 +244,7 @@ The HTML page should:
 
 Present the HTML file to the user.
 
-### Step 5: Apply Confirmed Changes
+### Step 4: Apply Confirmed Changes
 
 After the developer reviews the HTML page and tells you which changes to apply (by number or "all"):
 
