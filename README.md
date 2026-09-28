@@ -290,19 +290,6 @@ Or run everything at once:
 
 Each step feeds the next: the requirements analysis informs the plan, the plan drives implementation, the review catches issues, and the documentation captures what was built.
 
-## Migrating from the old custom commands
+## Further reading
 
-This repo previously shipped standalone slash commands under `Custom-Commands/`. They are superseded by the skills above:
-
-| Old command | New skill |
-|-------------|-----------|
-| `/analyze-requirements` | `/analyze-requirements` (unchanged) |
-| `/plan-implementation` | `/plan` |
-| `/fix-bug` | `/fix-bug` (unchanged) |
-| `/implement-plan` | `/implement` |
-| `/implement-plan-nicely` | `/implement --dashboard` |
-| `/review` | `/review` (unchanged) |
-| `/documentation` | `/document` |
-| `/full-cycle` | `/full-cycle` (now uses subagents) |
-
-Conventions that used to be repeated inside every command now live once in `.claude/rules/` and load automatically. See `skills/Claude_Code_New_Structure_Guide.pdf` for the reasoning behind the new structure.
+Conventions live once in `.claude/rules/` and load automatically by file path, so no skill has to repeat them. See `skills/Claude_Code_New_Structure_Guide.pdf` for the reasoning behind the skills / agents / rules / hooks structure.
