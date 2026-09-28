@@ -1,343 +1,308 @@
-# Custom Commands for Claude Code
+# Claude Code Skills for the Rails Dev Lifecycle
 
-A collection of slash commands that automate the full development lifecycle — from analyzing requirements to shipping documented, reviewed code.
+A drop-in `.claude/` setup for [Claude Code](https://claude.com/claude-code) that automates the full backend development lifecycle on a Rails project — from analyzing requirements to shipping reviewed, documented code.
 
-## Prerequisites
+It ships as **skills** (slash commands), **subagents** (isolated workers for heavy stages), **rules** (conventions that auto-load by file path), and **hooks** (guardrails that run around tool calls). Everything is generic: point it at your own Jira, Confluence, Figma and Rails codebase.
 
-These commands rely on the following MCP servers being configured in Claude Code:
+## Repo layout
 
-- **Atlassian MCP** — for Jira stories and Confluence pages
-- **Figma MCP** — for design file analysis (used by `/analyze-requirements`)
+| Path | What it is |
+|------|------------|
+| `skills/` | The Claude Code setup — copy its contents into your project (see Installation) |
+| `skills/.claude/` | Skills, agents, rules, hooks and `settings.json` |
+| `skills/CLAUDE.md` | Project-level instructions that tie the pipeline together |
+| `skills/Claude_Code_New_Structure_Guide.pdf` | Background on the skills/agents/rules/hooks structure |
+| `claude-course/`, `copilot-course/` | Personal course notes and screenshots (not part of the setup) |
+| `k9s-field-guide.html` | Unrelated k9s cheat sheet |
 
-## Commands Overview
+## Installation
 
-| Command | Purpose |
-|---------|---------|
-| `/analyze-requirements` | Analyze Jira stories + Figma designs, detect mismatches |
-| `/plan-implementation` | Create a phased implementation plan from Jira + Confluence + your ideas |
-| `/fix-bug` | Investigate a Jira bug, find root cause, create a fix plan |
-| `/implement-plan` | Execute an implementation plan phase by phase with architecture discussion |
-| `/implement-plan-nicely` | Same as `/implement-plan` but with a live HTML progress dashboard |
-| `/review` | Review code changes (local or remote MR) and generate an interactive HTML report |
-| `/documentation` | Create or update Confluence API documentation from code + plan |
-| `/full-cycle` | Run the entire dev lifecycle (analyze → plan → implement → review → document) with a live dashboard |
+1. Copy the setup into the root of your Rails project:
+
+   ```bash
+   cp -R skills/.claude  /path/to/your-rails-app/
+   cp    skills/CLAUDE.md /path/to/your-rails-app/
+   chmod +x /path/to/your-rails-app/.claude/hooks/*.sh
+   ```
+
+   If your project already has a `CLAUDE.md`, merge the "Backend workflow" section into it instead of overwriting.
+
+2. Make sure these MCP servers are configured in Claude Code:
+
+   - **Atlassian MCP** — Jira stories/bugs and Confluence pages
+   - **Figma MCP** — design file analysis (used by `/analyze-requirements` and `/full-cycle`)
+
+3. Project prerequisites: Ruby/Rails, RSpec, FactoryBot, and [rswag](https://github.com/rswag/rswag) for Swagger generation (`bundle exec rake rswag:specs:swaggerize`).
+
+4. Adjust project-specific paths. The API rules and the API-change hook assume endpoint permissions live in `config/initializers/init_dr_permissions.rb`. Change that path in `.claude/rules/api-endpoints.md` and `.claude/hooks/api-change-reminder.sh` to match your project, or drop the step if you don't have one.
+
+## What's inside
+
+### Skills (slash commands)
+
+| Skill | Purpose | Invocation |
+|-------|---------|------------|
+| `/analyze-requirements` | Cross-check Jira stories against Figma designs, produce a mismatch report, publish to Confluence | Manual only |
+| `/plan` | Create a phased implementation plan from Jira + Confluence + your thoughts, or revise an existing plan | Manual or auto |
+| `/fix-bug` | Investigate a Jira bug, find the root cause, write a bugfix plan | Manual or auto |
+| `/implement` | Execute a plan phase by phase with an architecture discussion first; optional live HTML dashboard | Manual only |
+| `/review` | Review local changes or a remote MR/PR against a Rails checklist; interactive HTML report | Manual or auto |
+| `/document` | Update rswag/Swagger specs, then create or update a Confluence API page | Manual only |
+| `/full-cycle` | Orchestrate all five stages for a set of stories, delegating heavy stages to subagents | Manual only |
+
+"Manual only" skills carry `disable-model-invocation: true` — Claude will never trigger them on its own because they publish or write a lot of code. The others can also be picked up automatically when you describe the task in plain words ("investigate PROJ-123", "review my changes").
+
+### Subagents
+
+Used by `/full-cycle` to keep the main conversation thin. Each one reads the corresponding skill, runs it in a fresh context, and reports back a short structured summary.
+
+| Agent | Runs | Used in |
+|-------|------|---------|
+| `requirements-analyst` | `/analyze-requirements` | Stage 1 — keeps the heavy Jira/Figma payloads out of the main context |
+| `code-reviewer` | `/review` (local mode, report only, never edits) | Stage 4 |
+| `doc-writer` | `/document` | Stage 5 |
+
+### Rules (auto-loaded conventions)
+
+Rules load only when Claude touches a file matching their `paths:` glob, so skills never restate them.
+
+| Rule | Loads for | Covers |
+|------|-----------|--------|
+| `rails-conventions.md` | `app/**/*.rb`, `lib/**/*.rb` | Thin controllers, service objects, N+1 prevention, style, security |
+| `rspec.md` | `spec/**/*.rb` | Spec structure, FactoryBot, edge-case coverage, running affected specs |
+| `api-endpoints.md` | `config/routes.rb`, `app/controllers/api/**`, `app/serializers/**`, `spec/integration/**` | Permissions file, V2 coverage, rswag spec + swaggerize, backward compatibility |
+
+### Hooks
+
+Configured in `.claude/settings.json`.
+
+| Hook | Event | What it does |
+|------|-------|--------------|
+| `block-debug-statements.sh` | `PreToolUse` on `Bash` | Blocks `git commit` if staged Ruby contains `binding.pry`, `byebug`, `debugger`, stray `puts`/`p`/`pp` |
+| `api-change-reminder.sh` | `PostToolUse` on `Edit`/`Write`/`MultiEdit` | When routes or API controllers change, reminds Claude to update permissions, rswag specs, Swagger and V2 |
+
+## Output files
+
+Everything the skills produce lands in `.plans/` inside your project:
+
+| File | Produced by |
+|------|-------------|
+| `requirements-analysis-<date>.md` | `/analyze-requirements` |
+| `implementation-plan-<STORY-IDS>-<date>.md`, `…-rev-N.md` | `/plan` |
+| `bugfix-<TICKET>-<date>.md` | `/fix-bug` |
+| `implementation-progress-<date>-<time>.html` | `/implement --dashboard` |
+| `review-<date>-<time>.html`, `review-mr-<ID>-<date>.html` | `/review` |
+| `doc-review-<date>-<time>.html` | `/document` (update mode) |
+| `full-cycle-<date>-<time>.md` | `/full-cycle` (state file) |
+
+Consider adding `.plans/` to your project's `.gitignore`.
 
 ---
 
 ## `/analyze-requirements`
 
-Analyzes Jira user stories and Figma designs, maps them together, detects mismatches, and produces a requirements report published to Confluence.
-
-### Usage
+Fetches Jira stories and Figma designs, maps them together, flags mismatches and gaps, saves a report and publishes it to Confluence.
 
 ```bash
-# Single ticket
+# Single or multiple tickets
 /analyze-requirements PROJ-123
-
-# Multiple tickets
 /analyze-requirements PROJ-123 PROJ-456 PROJ-789
 
-# Sprint
+# Sprint or whole project
 /analyze-requirements "Sprint 5"
+/analyze-requirements PROJ
 
-# Tickets + Figma designs
-/analyze-requirements PROJ-123 PROJ-456 --figma https://www.figma.com/design/abc/File1
-
-# Include linked issues and subtasks
-/analyze-requirements PROJ-123 PROJ-456 --check-linked-tasks
-
-# Full example
-/analyze-requirements PROJ-123 PROJ-456 --check-linked-tasks --figma https://www.figma.com/design/abc/File1
+# With Figma designs, linked tasks and a Confluence target folder
+/analyze-requirements PROJ-123 PROJ-456 --check-linked-tasks \
+  --figma https://www.figma.com/design/abc/File1 \
+  --confluence-folder https://<your-site>.atlassian.net/wiki/spaces/<KEY>/folder/<ID>
 ```
-
-### Flags
 
 | Flag | Description |
 |------|-------------|
-| `--figma <urls>` | One or more Figma file URLs to analyze |
-| `--check-linked-tasks` | Also fetch linked issues, subtasks, priority, and status |
+| `--figma <urls>` | One or more Figma file URLs (also discovered from story descriptions/attachments) |
+| `--check-linked-tasks` | Also pull priority, status, linked issues and subtasks |
+| `--confluence-folder <url>` | Folder to publish the report under; asked interactively if omitted |
 
-### Output
-
-- Local file: `.plans/requirements-analysis-[date].md`
-- Confluence page created automatically under the configured folder
+Pauses with a question only if a story has no matching design or vice versa.
 
 ---
 
-## `/plan-implementation`
+## `/plan`
 
-Creates a phased implementation plan by combining Jira stories, Confluence specs, and your initial thoughts. Supports two modes: **full planning** and **revision**.
+Creates a phased implementation plan, or revises an existing one. Every phase lists edge cases, performance considerations and maintenance notes.
 
-### Full Mode (first-time planning)
+**Full mode** — start from Jira (+ optional Confluence specs):
 
 ```bash
-/plan-implementation https://planradar.atlassian.net/browse/PROJ-123 \
-  --confluence https://planradar.atlassian.net/wiki/spaces/PMT/pages/123/Spec \
+/plan https://<your-site>.atlassian.net/browse/PROJ-123 \
+  --confluence https://<your-site>.atlassian.net/wiki/spaces/<KEY>/pages/<ID>/Spec \
   --thoughts "Queue-based approach with Redis"
 ```
 
-**Output:** `.plans/implementation-plan-PROJ-123-2026-02-15.md`
-
-### Revision Mode (mid-implementation changes)
-
-Pass an existing plan file instead of a Jira URL to enter revision mode:
+**Revision mode** — pass an existing plan instead of a Jira URL:
 
 ```bash
-/plan-implementation ./.plans/implementation-plan-PROJ-123-2026-02-15.md \
+/plan ./.plans/implementation-plan-PROJ-123-2026-02-15.md \
   --thoughts "Bulk delete locks the table, need batched soft deletes instead"
 ```
 
-**Output:** `.plans/implementation-plan-PROJ-123-2026-02-15-rev-1.md`
-
-Key behaviors in revision mode:
-- Discusses the proposed changes with you before writing
-- **Never overwrites** the original plan — always creates a new `-rev-N` file
-- The revision file works directly with `/implement-plan` to continue development
-
-### Flags
-
 | Flag | Description |
 |------|-------------|
-| `--confluence <urls>` | One or more Confluence page URLs with specs (optional in full mode) |
-| `--thoughts <text>` | Your implementation ideas or constraints (**required** in both modes) |
+| `--confluence <urls>` | Confluence spec pages (full mode, optional) |
+| `--thoughts <text>` | Your ideas or constraints (**required** in both modes) |
+
+Revision mode discusses the change with you first and **never overwrites** the original — it writes `…-rev-N.md`, which `/implement` consumes directly.
 
 ---
 
 ## `/fix-bug`
 
-Investigates a bug reported in Jira, traces the root cause through the codebase, presents findings, and creates a fix plan compatible with `/implement-plan`. This is an **interactive command** — it investigates step by step and discusses findings with you before creating the plan.
-
-### Usage
+Investigates a Jira bug step by step, presents the root cause (where / what / why / impact), waits for your confirmation, then writes a bugfix plan that `/implement` can run.
 
 ```bash
-# Jira link only
-/fix-bug https://planradar.atlassian.net/browse/PROJ-123
-
-# Jira link + developer hints
-/fix-bug https://planradar.atlassian.net/browse/PROJ-123 --thoughts "Happens only when the user has more than 50 projects, probably an N+1 or timeout issue"
+/fix-bug https://<your-site>.atlassian.net/browse/PROJ-123
+/fix-bug https://<your-site>.atlassian.net/browse/PROJ-123 \
+  --thoughts "Only happens with 50+ projects, probably an N+1 or timeout"
 ```
-
-### Flags
 
 | Flag | Description |
 |------|-------------|
-| `--thoughts <text>` | Optional hints about the bug — suspected area, reproduction notes, or initial observations |
+| `--thoughts <text>` | Optional hints: suspected area, reproduction notes, observations |
 
-### What It Does
-
-1. **Fetches the Jira ticket** — title, description, steps to reproduce, comments, attachments
-2. **Investigates root cause** — traces execution paths, checks for common Rails issues (N+1, race conditions, missing validations, etc.), reviews recent changes and existing specs
-3. **Presents findings** — structured root cause analysis with where, what, why, and impact
-4. **Waits for your confirmation** before creating the fix plan
-5. **Creates a fix plan** — saved to `.plans/bugfix-[TICKET-ID]-[date].md`, compatible with `/implement-plan`
-
-### Output
-
-- Fix plan: `.plans/bugfix-[TICKET-ID]-[date].md`
+The plan always includes a "Specs & Regression" phase and keeps the fix minimal — no drive-by refactors.
 
 ---
 
-## `/implement-plan`
+## `/implement`
 
-Takes an implementation plan and executes it phase by phase. This is an **interactive command** — it discusses architecture with you, implements one phase at a time, and waits for your confirmation before advancing.
-
-### Usage
+Executes a plan one phase at a time. Interactive by design: it walks through six architecture topics (SOLID, MVC boundaries, service boundaries, design patterns, V2 API coverage, folder structure) and asks for confirmation on each, then implements a phase, runs its specs, and asks before moving on.
 
 ```bash
-# With explicit path
-/implement-plan ./.plans/implementation-plan-PROJ-123-2026-02-15.md
+# Explicit plan
+/implement ./.plans/implementation-plan-PROJ-123-2026-02-15.md
 
-# Auto-detect latest plan
-/implement-plan
+# Auto-detect the newest implementation-plan-*.md or bugfix-*.md in .plans/
+/implement
+
+# With a live progress dashboard
+/implement --dashboard
 ```
 
-If no file path is provided, it auto-detects the latest `implementation-plan-*.md` or `bugfix-*.md` from the `.plans/` folder.
-
-### What It Does
-
-1. **Reads the plan** and summarizes it back to you
-2. **Architecture discussion** — walks through SOLID principles, MVC structure, service boundaries, design patterns, and file organization
-3. **Phase-by-phase implementation** — for each phase:
-   - Announces the phase and its goal
-   - Writes the implementation code + RSpec tests
-   - Checks API permissions and V2 coverage
-   - Presents a summary and waits for your approval
-4. **Final summary** — lists all files created/modified and architecture decisions
-
----
-
-## `/implement-plan-nicely`
-
-Identical to `/implement-plan` but with one key addition: it generates and continuously updates a **visual HTML dashboard** that tracks the full progress of the implementation — phases, architecture decisions, file counts, spec results, and issues.
-
-### Usage
-
-```bash
-# With explicit path
-/implement-plan-nicely ./.plans/implementation-plan-PROJ-123-2026-02-15.md
-
-# Auto-detect latest plan
-/implement-plan-nicely
-```
-
-If no file path is provided, it auto-detects the latest `implementation-plan-*.md` or `bugfix-*.md` from the `.plans/` folder.
-
-### What It Does
-
-Everything `/implement-plan` does, plus:
-
-1. **Generates a live HTML dashboard** (HTML + JSON two-file approach) — open once in a browser, no refresh needed
-2. **Updates in real-time** via JSON polling every 2 seconds — status icons change, progress bar fills, new items appear with smooth CSS transitions
-3. **Tracks status visually** with icons: ✅ Complete, 🔄 In Progress, ⏳ Pending, ❌ Failed, ⚠️ Needs Attention
-4. **Shows a summary section** with total files created/modified, spec results, architecture decisions, and V2 API coverage
-5. **Maintains an issues & notes log** at the bottom for spec failures, decisions, and tech debt
-
-### Output
-
-- Dashboard: `implementation-progress-[date]-[HHMMSS].html` + `implementation-progress-[date]-[HHMMSS].json`
+| Flag | Description |
+|------|-------------|
+| `--dashboard` | Also maintain a self-contained HTML progress page (phases, decisions, spec results, issues) that is regenerated on every update — refresh the tab to see progress |
 
 ---
 
 ## `/review`
 
-Reviews code changes and generates an interactive HTML report with categorized findings. Supports local changes and remote merge requests.
+Reviews code against a ten-point Rails checklist (N+1, performance, security, SOLID, structure, style, specs, backward compatibility, error handling, Rails practice) and produces an interactive HTML report where you tick the findings to act on.
 
-### Local Mode — review before commit
+**Local mode** — uncommitted changes:
 
 ```bash
-# Review all uncommitted changes
 /review
-
-# Review with plan reference (checks if plan needs updating)
 /review --plan ./.plans/implementation-plan-PROJ-123-2026-02-15.md
 ```
 
-### Remote Mode — review a Merge Request
+**Remote mode** — a merge request or pull request (comment only, never edits code):
 
 ```bash
-# GitLab
-/review https://gitlab.com/planradar/project/-/merge_requests/123
-
-# GitHub
-/review https://github.com/planradar/project/pull/456
+/review https://gitlab.com/<group>/<project>/-/merge_requests/123
+/review https://github.com/<org>/<repo>/pull/456
 ```
-
-### Flags
 
 | Flag | Description |
 |------|-------------|
-| `--plan <path>` | Path to the implementation plan (local mode only). Enables plan revision check after fixes |
+| `--plan <path>` | Local mode only. If the fixes changed the design, offers a `/plan` revision afterwards |
 
-### Review Checklist
-
-Every review checks for: N+1 queries, performance issues, security vulnerabilities, SOLID violations, code structure problems, syntax/style issues, spec coverage gaps, backward compatibility breaks, error handling, and Rails best practices.
-
-### Output
-
-- **Local mode:** `review-[date]-[HHMMSS].html` — interactive HTML with checkboxes to select fixes
-- **Remote mode:** `review-mr-[MR-ID]-[date].html` — interactive HTML with checkboxes to select comments to post
+Findings are graded Critical / Warning / Suggestion. In local mode the selected fixes are applied and the affected specs re-run.
 
 ---
 
-## `/documentation`
+## `/document`
 
-Creates or updates Confluence API documentation by analyzing the codebase and the implementation plan. In both New and Update modes, it **updates Swagger docs (via rswag) before generating the Confluence documentation**.
+Updates rswag/Swagger specs **first** (both modes), then creates or updates a Confluence API page.
 
-### New Mode — create a new documentation page
+**New page** under a Confluence folder:
 
 ```bash
-/documentation --new https://planradar.atlassian.net/wiki/spaces/PMT/folder/4040359987 \
+/document --new https://<your-site>.atlassian.net/wiki/spaces/<KEY>/folder/<ID> \
   ./.plans/implementation-plan-PROJ-123-2026-02-15.md \
   --thoughts "Checklist field feature, covers CRUD and bulk operations"
 ```
 
-### Update Mode — update an existing page
+**Update** an existing page:
 
 ```bash
-/documentation https://planradar.atlassian.net/wiki/spaces/PMT/pages/4031676438/CheckList+Field+Documentation \
+/document https://<your-site>.atlassian.net/wiki/spaces/<KEY>/pages/<ID>/Feature+Documentation \
   ./.plans/implementation-plan-PROJ-123-2026-02-15.md \
-  --thoughts "Added bulk delete endpoint, updated the update endpoint for partial updates"
+  --thoughts "Added bulk delete endpoint"
 ```
-
-### Flags
 
 | Flag | Description |
 |------|-------------|
-| `--new <folder-url>` | Create a new page under this Confluence folder |
+| `--new <folder-url>` | Create a new page under this folder |
 | `--thoughts <text>` | Optional context about what was implemented or changed |
 
-### Update Mode Behavior
-
-When updating, it generates an interactive HTML review page (`doc-review-[date]-[HHMMSS].html`) showing a before/after diff of each endpoint. You select which changes to apply before it updates Confluence.
+Update mode generates a before/after diff review page and applies only the changes you confirm, preserving the rest of the page byte-for-byte.
 
 ---
 
 ## `/full-cycle`
 
-Orchestrates the entire development lifecycle — from requirements analysis through implementation, review, and documentation — in a single automated pipeline with a live HTML dashboard. It chains all 5 stages together, auto-continuing where safe and pausing only at critical decisions.
-
-### Usage
+Runs the whole pipeline for a set of stories with a state file as the single source of truth. Heavy read-only stages run in subagents; interactive stages run in the main conversation.
 
 ```bash
-# Single ticket
 /full-cycle PROJ-123
-
-# Multiple tickets
-/full-cycle PROJ-123 PROJ-456 PROJ-789
-
-# With Figma designs
 /full-cycle PROJ-123 PROJ-456 --figma https://www.figma.com/design/abc/File1
-
-# With linked tasks
-/full-cycle PROJ-123 --check-linked-tasks
-
-# Full combo
-/full-cycle PROJ-123 PROJ-456 --check-linked-tasks --figma https://www.figma.com/design/abc/File1
-
-# Sprint
-/full-cycle "Sprint 5"
+/full-cycle PROJ-123 --check-linked-tasks \
+  --confluence-folder https://<your-site>.atlassian.net/wiki/spaces/<KEY>/folder/<ID>
 ```
-
-### Flags
 
 | Flag | Description |
 |------|-------------|
-| `--figma <urls>` | One or more Figma file URLs to analyze |
-| `--check-linked-tasks` | Also fetch linked issues, subtasks, priority, and status |
+| `--figma <urls>` | Figma files for the requirements stage |
+| `--check-linked-tasks` | Also fetch linked issues, subtasks, priority and status |
+| `--confluence-folder <url>` | Where to publish the requirements report (and default folder for documentation) |
 
-### Pipeline Stages
+**Stages:** requirements analysis → planning → implementation → review → documentation.
 
-1. **Requirements Analysis** — fetches Jira stories + Figma designs, maps them, detects mismatches, publishes to Confluence
-2. **Implementation Planning** — generates a phased plan from Jira + Confluence + analysis context
-3. **Implementation** — executes the plan phase by phase with architecture discussion (uses `/implement-plan-nicely` workflow)
-4. **Code Review** — reviews all changes and generates an interactive HTML report
-5. **Documentation** — creates or updates Confluence API documentation
-
-### Pause Points
-
-The pipeline pauses only at critical moments: unmapped stories/designs, before plan generation, architecture decisions, after each implementation phase, review results, and documentation target selection. Everything else auto-continues.
-
-### Output
-
-- Master dashboard: `full-cycle-[date]-[HHMMSS].html` — tracks all 5 stages, decisions, and artifacts in one view
-- Plus all artifacts from each stage (requirements md, plan md, review HTML, Confluence pages)
+**Pause points (only these):** unmapped stories/designs · before planning · the six architecture topics · after each implementation phase · review selection · documentation target · doc diff confirmation. Everything else auto-continues.
 
 ---
 
-## Typical Workflow
+## Typical workflow
 
 ```
-1. /analyze-requirements       →  Understand what to build
-2. /plan-implementation        →  Plan how to build it
-   /fix-bug                    →  Investigate a bug and create a fix plan
-3. /implement-plan             →  Build it phase by phase
-   /implement-plan-nicely      →  Build it with a live progress dashboard
-4. /review                     →  Review the code
-5. /documentation              →  Document the APIs
+1. /analyze-requirements   →  Understand what to build
+2. /plan                   →  Plan how to build it
+   /fix-bug                →  …or investigate a bug and create a fix plan
+3. /implement              →  Build it phase by phase (add --dashboard for a live view)
+4. /review                 →  Review the code
+5. /document               →  Update Swagger + Confluence
 
 Or run everything at once:
 
-   /full-cycle                 →  All 5 stages in one automated pipeline
+   /full-cycle             →  All 5 stages in one orchestrated pipeline
 ```
 
-Each step feeds into the next — the requirements analysis informs the plan, the plan drives implementation, the review catches issues, and the documentation captures what was built. Use `/full-cycle` to run the entire pipeline automatically with a single command.
+Each step feeds the next: the requirements analysis informs the plan, the plan drives implementation, the review catches issues, and the documentation captures what was built.
+
+## Migrating from the old custom commands
+
+This repo previously shipped standalone slash commands under `Custom-Commands/`. They are superseded by the skills above:
+
+| Old command | New skill |
+|-------------|-----------|
+| `/analyze-requirements` | `/analyze-requirements` (unchanged) |
+| `/plan-implementation` | `/plan` |
+| `/fix-bug` | `/fix-bug` (unchanged) |
+| `/implement-plan` | `/implement` |
+| `/implement-plan-nicely` | `/implement --dashboard` |
+| `/review` | `/review` (unchanged) |
+| `/documentation` | `/document` |
+| `/full-cycle` | `/full-cycle` (now uses subagents) |
+
+Conventions that used to be repeated inside every command now live once in `.claude/rules/` and load automatically. See `skills/Claude_Code_New_Structure_Guide.pdf` for the reasoning behind the new structure.
