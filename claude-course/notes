@@ -193,10 +193,69 @@ parallel claude code sessions:- [DONE]
 =============================================================================
 Subagents:- [DONE]
 ===========
--/agent:-
+=>Subagents give you three main benefits:
+	=>They break work into focused pieces, letting each subagent concentrate on a specific task.
+	=>They keep your main context window clean by isolating all the intermediate work.
+	=>They bring back just the information you need as a concise summary.	
+
+
+=>Subagents are specialized assistants that Claude Code can delegate tasks to.
+=>runs in its own conversation context window, does its work, and returns a summary to the main thread.
+
+=>Why Subagents Matter?
+	=> Every time you chat with Claude Code, you're adding to the main context window. 
+	=>Every tool call, every file read, every search result gets stored there. 
+	=>That space is finite, and once it fills up, Claude starts losing track of earlier parts 
+	  of the conversation.
+
+=>The subagent receives two things:
+	=>A custom system prompt from your configuration file that defines the subagent's role and behavior.
+	=>A task description written by the parent agent based on what you asked for.
+
+=> Built-in Subagents
+	=>General purpose subagent -- for multi-step tasks that require both exploration and action.
+	=>Explore -- for fast searching and navigation of codebases.
+	=>Plan -- used during plan mode for research and analysis of your codebase before presenting a plan.
+
+=>Custom Subagents
+	=>it can be a code reviewer, a test writer, a documentation generator, or anything else you need.
+
+
+
+=>/agent:-
 	=> crate new agent (name, desc, tools)
-	=> allow create more instance at the same time
-	
+	=>bykon y2ma user-level y2ma project-level
+	=>w recommended 5aly el AI hoa eli y3ml generate ll hagat de.
+	=>Customizing Tools: 
+		Read-only tools
+		Edit tools
+		Execution tools
+		MCP tools
+		Other tools
+	=>Choosing a Model and Color:
+		Haiku -- best for fast, lightweight tasks
+		Sonnet -- a good middle ground between speed and depth
+		Opus -- best for complex analysis
+		Inherit -- uses whatever model your main conversation is running
+	=>w kman t2dr t8er lon el agent w t5tar lon mo3en
+	=>system prompt: ay text mwgod b2a t7t w hoa dh eli bymyz subagent 3n el tany.
+	=>path for it on your machine: .claude/agents/your-agent-name.md
+	=>lw 3awz claude hoa eli ydy el task ll sub-agent automatically w kda ektb f el desc kelmt
+          "proactively" such as description: Proactively suggest running this agent after major code 
+	  changes...
+	=>34an t5ly el sub-agent y run automatic b2a, ektb desc kois 34an dh bysa3d el system prompt kman.
+	=>Defining an Output Format:
+		=>lazm t7dd eh el output w dh by3rfo eno khalas it's done w gablk el result.
+
+
+
+=>How to use?
+	=>by asking Claude directly or by typing @agent code-quality-reviewer in your message.
+	=>
+
+
+=>
+
 =============================================================================
 agentic-loop-tree:- [DONE]
 ===================
@@ -227,6 +286,87 @@ https://github.com/emarco177/claude-code-crash-course/tree/project/skills
 	=>3ml nfs el folder structure t7t .claude/skills/...
 	=>5d el hagat copy past blzbt w bs kda. 
 
+------
+
+=>el skills bt run automatic mn 8er ma a3mlha call
+=>lw 3andy aktr mn skill b nfs el esm  claude hy load men fyhom? fe priority
+	Enterprise — managed settings, highest priority
+	Personal — your home directory (~/.claude/skills)
+	Project — the .claude/skills directory inside a repository
+	Plugins — installed plugins, lowest priority
+
+	=>Enterprise (eli hoa bta3 claude nfso b2a)
+	=>Personal (eli hoa f el home directory bta3k enta bs)
+	=>Project (eli hoa goa planradar bs)
+	=>Plugins (eli hoa goa el project f .calude-plugins/skills)
+
+
+=>tb3n e7na bnst5dm el skills enna 7aten name w description w khalas bs f advanced settings momkn nst5dmha
+	=>allowed-tools: de optional w bt5lek t7dd eh el tools el msmo7a w hoa byst5dm el skills de
+	=>model: anhy model eli ysht8l m3 el skill de
+	=>Progressive disclosure: keep SKILL.md under 500 lines and link to supporting files 
+	  (references, scripts, assets) that Claude reads only when needed.
+	=>Scripts execute without loading their contents into context — only the output consumes tokens,
+	  keeping context efficient.
+	=>lw l2et el skill msh by7slha call rag3 el keywords eli f el desc w eli enta btktbha.
+
+
+=>Sharing Skills
+	=>Project skills in .claude/skills are shared automatically through Git 
+	=>Plugins let you distribute skills across repositories via marketplaces 
+	=>Enterprise managed settings deploy skills organization-wide with the highest priority, 
+	  ideal for mandatory standards and compliance.
+	=>Subagents don't automatically see your skills — you must explicitly list skills in a 
+	  custom agent's frontmatter skills field.
+	=>Built-in agents (Explorer, Plan, Verify) can't access skills at all — only 
+	  custom subagents defined in .claude/agents can.
+	=>
+
+
+=>el sub-agents msh byshofo el skills bta3tk lma btdehom task, eli hyshof el skills bta3tk el sub-agents
+  eli enta 3mltlhom create w lazm t list el skills de gwahom w tt2kd enha mwgoda.
+
+=>lma tkon 3awz t3ml debug: claude --debug
+
+=>lma ykon f moshkla f el skill, msh sh8ala aw darba aw ay haga fa fe et7mal mn dol
+	=>Start with the skills validator tool — it catches structural problems before 
+	  you spend time debugging other things.
+		-uv tool install skills-ref
+		-skills-ref validate ~/.claude/skills/backend-review
+
+	=>If a skill doesn't trigger, the cause is almost always the description — 
+	  add trigger phrases that match how you actually phrase requests.
+	=>If a skill doesn't load, check that SKILL.md is inside a named directory 
+	  (not at the skills root) and the file name is exactly SKILL.md
+	=>If the wrong skill gets used, your descriptions are too similar — make them more distinct
+	=>For runtime errors, check dependencies, file permissions (chmod +x), and 
+	  path separators (use forward slashes everywhere).
+	=>Plugin Skills Not Appearing: Clear the cache, restart Claude Code, and reinstall.
+
+=>Quick Troubleshooting Checklist:
+	=>Not triggering? Improve your description and add trigger phrases.
+	=>Not loading? Check your path, file name, and YAML syntax.
+	=>Wrong skill used? Make descriptions more distinct from each other.
+	=>Being shadowed? Check the priority hierarchy and rename if needed.
+	=>Plugin skills missing? Clear cache and reinstall.
+	=>Runtime failure? Check dependencies, permissions, and paths.
+
+
+=>Ask Claude what happened if I called skill manually? Is it okay or not?
+	=>disable-model-invocation: true: The skill can only be invoked manually via /skill-name, and 
+	  Claude won't trigger it on its own. Best for skills with side effects, 
+	  like commands that create or update Jira tickets or Confluence pages.
+	=>user-invocable: false: The opposite. The skill is hidden from the / menu, and only Claude 
+	  can load it automatically. Best for background knowledge or 
+	  reference material rather than actions.
+
+
+=>How to use? 
+	=>by7slha detect mn el msg bta3tk 34an by3mlha match m3 el name w el des
+	=>aw enta t3ml /skill-name b nfsk w tkon sayb el default mood mt8yrosh 
+	  34an ymshy 3 el template bta3tk.
+	=>path for it on your machine: .claude/skills 
+
 =============================================================================
 SKills vs MCP:- [DONE]
 ===============
@@ -253,8 +393,21 @@ skills vs subagents:- [DONE]
 -tb a5tar men f eh? 
 	=>lw 3andk heavy task w msh 3awz tfsh5 el main context window, est5dm subagent
 =============================================================================
+compare all tools to see which one you will use:-
+=================================================
+=>CLAUDE.md loads into every conversation and is best for always-on project standards. 
+  Skills load on demand and are best for task-specific expertise.
 
-==================
+=>Subagents run in isolated execution contexts — use them for delegated work. 
+  Skills add knowledge to your current conversation.
+
+=>Hooks are event-driven (fire on file saves, tool calls). 
+  Skills are request-driven (activate based on what you're asking).
+
+=>MCP servers provide external tools and integrations — a different category entirely from skills
+
+=>Each feature handles its own specialty — combine them rather than forcing everything into one approach
+
 
 
 
